@@ -2,44 +2,61 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Horas Extras</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Registro de Horas Extras</h1>
-
-    <form id="registro-form">
-      <label>Usuário:</label>
-      <input type="text" id="usuario" required />
-
-      <label>Data:</label>
-      <input type="date" id="data" required />
-
-      <label>Hora de Início:</label>
-      <input type="time" id="inicio" />
-
-      <label>Hora de Término:</label>
-      <input type="time" id="fim" required />
-
-      <label>Justificativa:</label>
-      <textarea id="justificativa" rows="3" required></textarea>
-
+    <h1>Controle de Horas Extras</h1>
+    <form id="form-horas">
+      <label>Usuário:
+        <input type="text" id="usuario" required />
+      </label>
+      <label>Data:
+        <input type="date" id="data" required />
+      </label>
+      <label>Início:
+        <input type="time" id="inicio" />
+      </label>
+      <label>Fim:
+        <input type="time" id="fim" required />
+      </label>
+      <label>Justificativa:
+        <input type="text" id="justificativa" required />
+      </label>
+      <label>Salário Mensal:
+        <input type="number" id="salario" required />
+      </label>
       <button type="submit">Salvar Registro</button>
     </form>
 
-    <div class="totalizadores">
-      <h2>Totais</h2>
-      <p>75%: <span id="total75">0h - R$0,00</span></p>
-      <p>100%: <span id="total100">0h - R$0,00</span></p>
-      <p>Total Geral: <span id="totalGeral">0h - R$0,00</span></p>
+    <div class="resultados">
+      <h2>Resumo</h2>
+      <p>Total 75%: R$ <span id="total75">0.00</span></p>
+      <p>Total 100%: R$ <span id="total100">0.00</span></p>
+      <p>Total Geral: R$ <span id="totalGeral">0.00</span></p>
     </div>
 
-    <button onclick="exportarRegistros()">Exportar para Excel</button>
+    <table id="tabela-registros">
+      <thead>
+        <tr>
+          <th>Usuário</th>
+          <th>Data</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Horas</th>
+          <th>%</th>
+          <th>Justificativa</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button id="exportar">Exportar para Excel</button>
   </div>
 
-  <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
