@@ -25,17 +25,24 @@
             <button type="submit">Adicionar Registro</button>
         </form>
 
+        <div class="botoes-secundarios">
+            <button id="exportarExcel">Exportar para Excel</button>
+            <button id="limparDados">Limpar Tudo</button>
+        </div>
+
         <h2>Totais Acumulados</h2>
         <div id="resumo">
             <p>Horas com 75%: <span id="horas75">0</span>h</p>
             <p>Horas com 100%: <span id="horas100">0</span>h</p>
             <p>Total Geral: <span id="totalHoras">0</span>h</p>
+            <p>Valor total (R$): <span id="valorTotal">0.00</span></p>
         </div>
 
         <h2>Registros</h2>
         <ul id="listaRegistros"></ul>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
