@@ -1,61 +1,51 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
+  background: #f2f2f2;
   padding: 20px;
 }
 
 .container {
   max-width: 600px;
   margin: auto;
-  background: white;
-  padding: 20px;
+  background: #fff;
+  padding: 25px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px #ccc;
 }
 
 h1, h2 {
   text-align: center;
-  color: #333;
 }
 
 label {
   display: block;
-  margin-top: 10px;
+  margin-top: 15px;
   font-weight: bold;
 }
 
-input[type="date"],
-input[type="time"],
-input[type="number"] {
+input, textarea {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
   border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
 button {
-  padding: 10px 15px;
-  margin-top: 10px;
-  background-color: #007bff;
+  margin-top: 20px;
+  padding: 10px;
+  width: 100%;
+  background: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
-  cursor: pointer;
+  font-size: 16px;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background: #0056b3;
 }
 
-.botoes {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-#resumo, #registros {
+.totalizadores {
   margin-top: 30px;
 }
