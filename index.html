@@ -4,63 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Controle de Horas Extras</title>
-  <link rel="stylesheet" href="estilo.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="estilo.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Controle de Horas Extras</h1>
-    <form id="registro-form">
-      <label for="usuario">Usuário:</label>
-      <input type="text" id="usuario" required>
+    <h2>Usuário:</h2>
+    <input type="text" id="usuario" value="Wildner Barbieri" />
 
-      <label for="data">Data:</label>
-      <input type="date" id="data" required>
+    <h2>Data:</h2>
+    <input type="date" id="data" />
 
-      <label for="inicio">Hora Início:</label>
-      <input type="time" id="inicio" required>
+    <h2>Hora Início:</h2>
+    <input type="time" id="horaInicio" />
 
-      <label for="fim">Hora Fim:</label>
-      <input type="time" id="fim" required>
+    <h2>Hora Fim:</h2>
+    <input type="time" id="horaFim" />
 
-      <label for="salario">Salário (mensal):</label>
-      <input type="number" id="salario" step="0.01" required>
+    <h2>Salário (mensal):</h2>
+    <input type="number" id="salario" />
 
-      <label for="motivo">Justificativa:</label>
-      <input type="text" id="motivo" required>
+    <h2>Justificativa:</h2>
+    <input type="text" id="justificativa" />
 
-      <button type="submit">Salvar Registro</button>
-    </form>
+    <button onclick="salvarRegistro()">Salvar Registro</button>
+    <button onclick="exportarParaExcel()">Exportar para Excel</button>
 
-    <div class="resultados">
-      <h2>Registros</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Início</th>
-            <th>Fim</th>
-            <th>Horas</th>
-            <th>Valor 75%</th>
-            <th>Valor 100%</th>
-            <th>Total</th>
-            <th>Motivo</th>
-            <th>Usuário</th>
-            <th>Período</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-corpo"></tbody>
-      </table>
-
-      <div class="totais">
-        <p>Total 75%: <span id="acumulado75">R$ 0,00</span></p>
-        <p>Total 100%: <span id="acumulado100">R$ 0,00</span></p>
-        <p>Total Geral: <span id="acumuladoTotal">R$ 0,00</span></p>
-      </div>
-
-      <button id="exportar">Exportar para Excel</button>
-    </div>
+    <h2>Registros</h2>
+    <table id="registrosTabela">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Horas</th>
+          <th>Valor 75%</th>
+          <th>Valor 100%</th>
+          <th>Total</th>
+          <th>Motivo</th>
+          <th>Usuário</th>
+          <th>Período</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
+  <script src="script.js"></script>
 </body>
 </html>
