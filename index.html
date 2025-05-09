@@ -2,36 +2,41 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Controle de Horas Extras</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Controle de Horas Extras</h1>
-    <form id="extraForm">
-      <label for="data">Data:</label>
+    <h1>Registro de Horas Extras</h1>
+
+    <form id="registro-form">
+      <label>Usuário:</label>
+      <input type="text" id="usuario" required />
+
+      <label>Data:</label>
       <input type="date" id="data" required />
 
-      <label for="horaInicio">Início:</label>
-      <input type="time" id="horaInicio" required />
+      <label>Hora de Início:</label>
+      <input type="time" id="inicio" />
 
-      <label for="horaFim">Fim:</label>
-      <input type="time" id="horaFim" required />
+      <label>Hora de Término:</label>
+      <input type="time" id="fim" required />
 
-      <label for="salario">Salário mensal (R$):</label>
-      <input type="number" id="salario" required />
+      <label>Justificativa:</label>
+      <textarea id="justificativa" rows="3" required></textarea>
 
-      <button type="submit">Adicionar</button>
+      <button type="submit">Salvar Registro</button>
     </form>
 
-    <div class="botoes">
-      <button onclick="exportarExcel()">Exportar para Excel</button>
-      <button onclick="limparTudo()">Limpar Tudo</button>
+    <div class="totalizadores">
+      <h2>Totais</h2>
+      <p>75%: <span id="total75">0h - R$0,00</span></p>
+      <p>100%: <span id="total100">0h - R$0,00</span></p>
+      <p>Total Geral: <span id="totalGeral">0h - R$0,00</span></p>
     </div>
 
-    <div id="resumo"></div>
-    <div id="registros"></div>
+    <button onclick="exportarRegistros()">Exportar para Excel</button>
   </div>
 
   <script src="script.js"></script>
