@@ -1,104 +1,111 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("formRegistro");
-    const lista = document.getElementById("listaRegistros");
-    const horas75Span = document.getElementById("horas75");
-    const horas100Span = document.getElementById("horas100");
-    const totalHorasSpan = document.getElementById("totalHoras");
-    const valorTotalSpan = document.getElementById("valorTotal");
+const form = document.getElementById('extraForm');
+const registrosDiv = document.getElementById('registros');
+const resumoDiv = document.getElementById('resumo');
 
-    const exportarBtn = document.getElementById("exportarExcel");
-    const limparBtn = document.getElementById("limparDados");
+let registros = JSON.parse(localStorage.getItem('registros')) || [];
 
-    let registros = JSON.parse(localStorage.getItem("registros")) || [];
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
 
-    function salvarRegistros() {
-        localStorage.setItem("registros", JSON.stringify(registros));
-    }
+  const data = document.getElementById('data').value;
+  const inicio = document.getElementById('horaInicio').value;
+  const fim = document.getElementById('horaFim').value;
+  const salario = parseFloat(document.getElementById('salario').value);
 
-    function calcularExtras(inicio, fim, data, salario) {
-        const dia = new Date(data).getDay();
-        const isFinalDeSemana = dia === 0 || dia === 6;
-        const inicioData = new Date(`${data}T${inicio}`);
-        const fimData = new Date(`${data}T${fim}`);
-        let diffHoras = (fimData - inicioData) / (1000 * 60 * 60);
-        diffHoras = Math.max(0, diffHoras);
+  if (!data || !inicio || !fim || isNaN(salario)) return;
 
-        let h75 = 0, h100 = 0;
+  const inicioMin = toMinutes(inicio);
+  const fimMin = toMinutes(fim);
+  const totalMin = fimMin - inicioMin;
 
-        if (isFinalDeSemana) {
-            h100 = diffHoras;
-        } else {
-            if (diffHoras <= 2) {
-                h75 = diffHoras;
-            } else {
-                h75 = 2;
-                h100 = diffHoras - 2;
-            }
-        }
+  let h75 = 0, h100 = 0;
+  if (totalMin <= 120) {
+    h75 = totalMin / 60;
+  } else {
+    h75 = 2;
+    h100 = (totalMin - 120) / 60;
+  }
 
-        const valorHora = salario / 220;
-        const valor75 = h75 * valorHora * 1.75;
-        const valor100 = h100 * valorHora * 2;
+  registros.push({ data, inicio, fim, h75, h100, salario });
+  localStorage.setItem('registros', JSON.stringify(registros));
 
-        return { h75, h100, total: h75 + h100, valor75, valor100 };
-    }
-
-    function atualizarResumo() {
-        let total75 = 0, total100 = 0, valorTotal = 0;
-        registros.forEach(r => {
-            total75 += r.h75;
-            total100 += r.h100;
-            valorTotal += r.valor75 + r.valor100;
-        });
-
-        horas75Span.textContent = total75.toFixed(2);
-        horas100Span.textContent = total100.toFixed(2);
-        totalHorasSpan.textContent = (total75 + total100).toFixed(2);
-        valorTotalSpan.textContent = valorTotal.toFixed(2);
-    }
-
-    function renderizarRegistros() {
-        lista.innerHTML = "";
-        registros.forEach((r, index) => {
-            const li = document.createElement("li");
-            li.textContent = `${r.data}: ${r.inicio} - ${r.fim} | 75%: ${r.h75.toFixed(2)}h, 100%: ${r.h100.toFixed(2)}h`;
-            lista.appendChild(li);
-        });
-    }
-
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const salario = parseFloat(document.getElementById("salario").value);
-        const data = document.getElementById("data").value;
-        const inicio = document.getElementById("inicio").value;
-        const fim = document.getElementById("fim").value;
-
-        if (!salario || !data || !inicio || !fim) return;
-
-        const calculo = calcularExtras(inicio, fim, data, salario);
-        registros.push({ salario, data, inicio, fim, ...calculo });
-        salvarRegistros();
-        renderizarRegistros();
-        atualizarResumo();
-        form.reset();
-    });
-
-    exportarBtn.addEventListener("click", () => {
-        const ws = XLSX.utils.json_to_sheet(registros);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Horas Extras");
-        XLSX.writeFile(wb, "horas_extras.xlsx");
-    });
-
-    limparBtn.addEventListener("click", () => {
-        if (confirm("Tem certeza que deseja apagar todos os registros?")) {
-            registros = [];
-            salvarRegistros();
-            renderizarRegistros();
-            atualizarResumo();
-        }
-    });
-
-    renderizarRegistros();
-    atualizarResumo();
+  renderizar();
+  form.reset();
 });
+
+function toMinutes(hora) {
+  const [h, m] = hora.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function calcularResumo(fechamentoDia = 20) {
+  const periodos = {};
+
+  registros.forEach(r => {
+    const [ano, mes, dia] = r.data.split('-').map(Number);
+    const data = new Date(ano, mes - 1, dia);
+
+    let chave;
+    if (dia <= fechamentoDia) {
+      chave = `${ano}-${String(mes).padStart(2, '0')}`;
+    } else {
+      const next = new Date(ano, mes, 1);
+      chave = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    if (!periodos[chave]) periodos[chave] = [];
+    periodos[chave].push(r);
+  });
+
+  return Object.entries(periodos).map(([periodo, dados]) => {
+    const h75 = dados.reduce((acc, r) => acc + r.h75, 0);
+    const h100 = dados.reduce((acc, r) => acc + r.h100, 0);
+    const total = h75 + h100;
+    const salario = dados[dados.length - 1].salario;
+    const valorHora = salario / 220;
+    const valorTotal = (h75 * valorHora * 1.75) + (h100 * valorHora * 2);
+
+    return { periodo, h75, h100, total, valorTotal, registros: dados };
+  });
+}
+
+function renderizar() {
+  const resumos = calcularResumo();
+
+  resumoDiv.innerHTML = resumos.map(r => `
+    <h2>Período: ${r.periodo}</h2>
+    <p>Horas com 75%: ${r.h75.toFixed(2)}h</p>
+    <p>Horas com 100%: ${r.h100.toFixed(2)}h</p>
+    <p>Total Geral: ${r.total.toFixed(2)}h</p>
+    <p>Valor total (R$): ${r.valorTotal.toFixed(2)}</p>
+  `).join('');
+
+  registrosDiv.innerHTML = `<h2>Registros</h2><ul>${registros.map(r =>
+    `<li>${r.data}: ${r.inicio} - ${r.fim} | 75%: ${r.h75.toFixed(2)}h, 100%: ${r.h100.toFixed(2)}h</li>`).join('')}</ul>`;
+}
+
+function limparTudo() {
+  if (confirm('Deseja realmente limpar todos os dados?')) {
+    registros = [];
+    localStorage.removeItem('registros');
+    renderizar();
+  }
+}
+
+function exportarExcel() {
+  let csv = 'Data,Inicio,Fim,Horas 75%,Horas 100%,Salario\n';
+  registros.forEach(r => {
+    csv += `${r.data},${r.inicio},${r.fim},${r.h75.toFixed(2)},${r.h100.toFixed(2)},${r.salario}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'registros_horas_extras.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+renderizar();
