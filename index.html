@@ -2,61 +2,65 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Controle de Horas Extras</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="estilo.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
   <div class="container">
     <h1>Controle de Horas Extras</h1>
-    <form id="form-horas">
-      <label>Usuário:
-        <input type="text" id="usuario" required />
-      </label>
-      <label>Data:
-        <input type="date" id="data" required />
-      </label>
-      <label>Início:
-        <input type="time" id="inicio" />
-      </label>
-      <label>Fim:
-        <input type="time" id="fim" required />
-      </label>
-      <label>Justificativa:
-        <input type="text" id="justificativa" required />
-      </label>
-      <label>Salário Mensal:
-        <input type="number" id="salario" required />
-      </label>
+    <form id="registro-form">
+      <label for="usuario">Usuário:</label>
+      <input type="text" id="usuario" required>
+
+      <label for="data">Data:</label>
+      <input type="date" id="data" required>
+
+      <label for="inicio">Hora Início:</label>
+      <input type="time" id="inicio" required>
+
+      <label for="fim">Hora Fim:</label>
+      <input type="time" id="fim" required>
+
+      <label for="salario">Salário (mensal):</label>
+      <input type="number" id="salario" step="0.01" required>
+
+      <label for="motivo">Justificativa:</label>
+      <input type="text" id="motivo" required>
+
       <button type="submit">Salvar Registro</button>
     </form>
 
     <div class="resultados">
-      <h2>Resumo</h2>
-      <p>Total 75%: R$ <span id="total75">0.00</span></p>
-      <p>Total 100%: R$ <span id="total100">0.00</span></p>
-      <p>Total Geral: R$ <span id="totalGeral">0.00</span></p>
+      <h2>Registros</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Início</th>
+            <th>Fim</th>
+            <th>Horas</th>
+            <th>Valor 75%</th>
+            <th>Valor 100%</th>
+            <th>Total</th>
+            <th>Motivo</th>
+            <th>Usuário</th>
+            <th>Período</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-corpo"></tbody>
+      </table>
+
+      <div class="totais">
+        <p>Total 75%: <span id="acumulado75">R$ 0,00</span></p>
+        <p>Total 100%: <span id="acumulado100">R$ 0,00</span></p>
+        <p>Total Geral: <span id="acumuladoTotal">R$ 0,00</span></p>
+      </div>
+
+      <button id="exportar">Exportar para Excel</button>
     </div>
-
-    <table id="tabela-registros">
-      <thead>
-        <tr>
-          <th>Usuário</th>
-          <th>Data</th>
-          <th>Início</th>
-          <th>Fim</th>
-          <th>Horas</th>
-          <th>%</th>
-          <th>Justificativa</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <button id="exportar">Exportar para Excel</button>
   </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
