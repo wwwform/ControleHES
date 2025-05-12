@@ -1,16 +1,22 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f5f5f5;
+  background-color: #f8f9fa;
   margin: 0;
   padding: 20px;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 600px;
   margin: auto;
-  background: #fff;
+  background: white;
   padding: 20px;
   border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+  text-align: center;
+  color: #333;
 }
 
 label {
@@ -19,35 +25,37 @@ label {
   font-weight: bold;
 }
 
-input {
+input[type="date"],
+input[type="time"],
+input[type="number"] {
   width: 100%;
-  padding: 6px;
-  margin-bottom: 10px;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 button {
-  margin-right: 10px;
-  padding: 8px 12px;
+  padding: 10px 15px;
+  margin-top: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+button:hover {
+  background-color: #0056b3;
+}
+
+.botoes {
+  display: flex;
+  justify-content: space-between;
   margin-top: 20px;
 }
 
-th, td {
-  border: 1px solid #333;
-  padding: 8px;
-  text-align: center;
-}
-
-thead {
-  background: #333;
-  color: #fff;
-}
-
-tfoot td {
-  font-weight: bold;
-  background: #eee;
+#resumo, #registros {
+  margin-top: 30px;
 }
