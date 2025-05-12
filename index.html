@@ -19,17 +19,14 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <div id="mainContent" class="container">
-        <!-- Cabeçalho -->
+    <div id="mainContent" class="container" style="display:none;">
         <div class="header">
             <h1>🕒 Controle de Horas Extras Pro</h1>
             <button id="btnLogout" class="logout-btn">Sair</button>
         </div>
         
-        <!-- Notificações -->
         <div id="notificacoes" class="notificacao"></div>
 
-        <!-- Formulário -->
         <form id="registroForm">
             <input type="date" id="data" required>
             <div class="time-inputs">
@@ -41,15 +38,13 @@
             <button type="submit">💾 Salvar Registro</button>
         </form>
 
-        <!-- Backup -->
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
-            <button onclick="exportarBackup()">Exportar Backup</button>
-            <input type="file" id="btnImportBackup" accept=".json">
+            <button type="button" onclick="exportarBackup()">Exportar Backup</button>
+            <input type="file" id="btnImportBackup" accept=".json" style="display:none;">
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
 
-        <!-- Resumo -->
         <div class="resumo">
             <h2>📊 Resumo do Período (21/{{mês-1}} a 20/{{mês}})</h2>
             <div id="valores">
@@ -58,13 +53,12 @@
                 <p>Total: R$ <span id="totalGeral">0.00</span></p>
             </div>
             <div class="botoes-exportacao">
-                <button onclick="exportarExcel()">📊 Excel</button>
-                <button onclick="exportarPDF()">📄 PDF</button>
-                <button onclick="exportarWord()">📑 Word</button>
+                <button type="button" onclick="exportarExcel()">📊 Excel</button>
+                <button type="button" onclick="exportarPDF()">📄 PDF</button>
+                <button type="button" onclick="exportarWord()">📑 Word</button>
             </div>
         </div>
 
-        <!-- Tabela -->
         <table id="registros">
             <thead>
                 <tr>
@@ -77,7 +71,6 @@
             <tbody></tbody>
         </table>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
