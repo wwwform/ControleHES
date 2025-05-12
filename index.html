@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Horas Extras</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Horas Extras</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Controle de Horas Extras</h1>
-    <form id="extraForm">
-      <label for="data">Data:</label>
-      <input type="date" id="data" required />
+    <h2>Usuário:</h2>
+    <input type="text" id="usuario" placeholder="Digite seu nome">
 
-      <label for="horaInicio">Início:</label>
-      <input type="time" id="horaInicio" required />
+    <h2>Data:</h2>
+    <input type="date" id="data">
 
-      <label for="horaFim">Fim:</label>
-      <input type="time" id="horaFim" required />
+    <h2>Hora Início:</h2>
+    <input type="time" id="inicio">
 
-      <label for="salario">Salário mensal (R$):</label>
-      <input type="number" id="salario" required />
+    <h2>Hora Fim:</h2>
+    <input type="time" id="fim">
 
-      <button type="submit">Adicionar</button>
-    </form>
+    <h2>Salário (mensal):</h2>
+    <input type="number" id="salario" placeholder="Ex: 2000">
 
-    <div class="botoes">
-      <button onclick="exportarExcel()">Exportar para Excel</button>
-      <button onclick="limparTudo()">Limpar Tudo</button>
-    </div>
+    <h2>Justificativa:</h2>
+    <input type="text" id="justificativa" placeholder="Descreva o motivo">
 
-    <div id="resumo"></div>
-    <div id="registros"></div>
-  </div>
+    <button onclick="salvarRegistro()">Salvar Registro</button>
+    <button onclick="exportarExcel()">Exportar para Excel</button>
 
-  <script src="script.js"></script>
+    <h2>Registros</h2>
+    <div id="registrosContainer"></div>
+
+    <script src="script.js"></script>
 </body>
 </html>

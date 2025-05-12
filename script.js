@@ -1,111 +1,139 @@
-const form = document.getElementById('extraForm');
-const registrosDiv = document.getElementById('registros');
-const resumoDiv = document.getElementById('resumo');
+const registrosKey = 'registros_he';
+const feriados = ['2025-01-01', '2025-04-21', '2025-05-01', '2025-09-07', '2025-10-12', '2025-11-02', '2025-11-15', '2025-12-25'];
 
-let registros = JSON.parse(localStorage.getItem('registros')) || [];
+function isFinalDeSemana(data) {
+    const dia = new Date(data).getDay();
+    return dia === 0 || dia === 6;
+}
 
-form.addEventListener('submit', function (e) {
-  e.preventDefault();
+function isFeriado(data) {
+    return feriados.includes(data);
+}
 
-  const data = document.getElementById('data').value;
-  const inicio = document.getElementById('horaInicio').value;
-  const fim = document.getElementById('horaFim').value;
-  const salario = parseFloat(document.getElementById('salario').value);
-
-  if (!data || !inicio || !fim || isNaN(salario)) return;
-
-  const inicioMin = toMinutes(inicio);
-  const fimMin = toMinutes(fim);
-  const totalMin = fimMin - inicioMin;
-
-  let h75 = 0, h100 = 0;
-  if (totalMin <= 120) {
-    h75 = totalMin / 60;
-  } else {
-    h75 = 2;
-    h100 = (totalMin - 120) / 60;
-  }
-
-  registros.push({ data, inicio, fim, h75, h100, salario });
-  localStorage.setItem('registros', JSON.stringify(registros));
-
-  renderizar();
-  form.reset();
+document.getElementById('data').addEventListener('change', function() {
+    const dataSelecionada = this.value;
+    if (!isFinalDeSemana(dataSelecionada) && !isFeriado(dataSelecionada)) {
+        document.getElementById('inicio').value = "17:24";
+    }
 });
 
-function toMinutes(hora) {
-  const [h, m] = hora.split(':').map(Number);
-  return h * 60 + m;
-}
+function salvarRegistro() {
+    const data = document.getElementById('data').value;
+    const inicio = document.getElementById('inicio').value;
+    const fim = document.getElementById('fim').value;
+    const salario = parseFloat(document.getElementById('salario').value);
+    const justificativa = document.getElementById('justificativa').value;
+    const usuario = document.getElementById('usuario').value;
 
-function calcularResumo(fechamentoDia = 20) {
-  const periodos = {};
-
-  registros.forEach(r => {
-    const [ano, mes, dia] = r.data.split('-').map(Number);
-    const data = new Date(ano, mes - 1, dia);
-
-    let chave;
-    if (dia <= fechamentoDia) {
-      chave = `${ano}-${String(mes).padStart(2, '0')}`;
-    } else {
-      const next = new Date(ano, mes, 1);
-      chave = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+    if (!data || !inicio || !fim || !salario || !justificativa || !usuario) {
+        alert("Preencha todos os campos!");
+        return;
     }
 
-    if (!periodos[chave]) periodos[chave] = [];
-    periodos[chave].push(r);
-  });
+    const hInicio = parseFloat(inicio.replace(":", "."));
+    const hFim = parseFloat(fim.replace(":", "."));
+    const hTotal = hFim - hInicio;
 
-  return Object.entries(periodos).map(([periodo, dados]) => {
-    const h75 = dados.reduce((acc, r) => acc + r.h75, 0);
-    const h100 = dados.reduce((acc, r) => acc + r.h100, 0);
-    const total = h75 + h100;
-    const salario = dados[dados.length - 1].salario;
+    let h75 = 0;
+    let h100 = 0;
+
+    if (isFinalDeSemana(data) || isFeriado(data)) {
+        h100 = hTotal;
+    } else {
+        if (hTotal <= 2) {
+            h75 = hTotal;
+        } else {
+            h75 = 2;
+            h100 = hTotal - 2;
+        }
+    }
+
     const valorHora = salario / 220;
-    const valorTotal = (h75 * valorHora * 1.75) + (h100 * valorHora * 2);
+    const valor75 = h75 * valorHora * 1.75;
+    const valor100 = h100 * valorHora * 2.0;
+    const total = valor75 + valor100;
 
-    return { periodo, h75, h100, total, valorTotal, registros: dados };
-  });
+    const registro = {
+        data, inicio, fim, h75, h100, salario, valor75, valor100, total, justificativa, usuario
+    };
+
+    const registros = JSON.parse(localStorage.getItem(registrosKey)) || [];
+    registros.push(registro);
+    localStorage.setItem(registrosKey, JSON.stringify(registros));
+    renderizarRegistros();
 }
 
-function renderizar() {
-  const resumos = calcularResumo();
+function renderizarRegistros() {
+    const registros = JSON.parse(localStorage.getItem(registrosKey)) || [];
+    const container = document.getElementById('registrosContainer');
+    container.innerHTML = "";
 
-  resumoDiv.innerHTML = resumos.map(r => `
-    <h2>Período: ${r.periodo}</h2>
-    <p>Horas com 75%: ${r.h75.toFixed(2)}h</p>
-    <p>Horas com 100%: ${r.h100.toFixed(2)}h</p>
-    <p>Total Geral: ${r.total.toFixed(2)}h</p>
-    <p>Valor total (R$): ${r.valorTotal.toFixed(2)}</p>
-  `).join('');
+    const tabela = document.createElement('table');
+    const header = `
+        <tr>
+            <th>Data</th><th>Início</th><th>Fim</th><th>Horas</th><th>Valor 75%</th>
+            <th>Valor 100%</th><th>Total</th><th>Motivo</th><th>Usuário</th><th>Período</th>
+        </tr>`;
+    tabela.innerHTML = header;
 
-  registrosDiv.innerHTML = `<h2>Registros</h2><ul>${registros.map(r =>
-    `<li>${r.data}: ${r.inicio} - ${r.fim} | 75%: ${r.h75.toFixed(2)}h, 100%: ${r.h100.toFixed(2)}h</li>`).join('')}</ul>`;
+    registros.forEach(reg => {
+        const data = new Date(reg.data);
+        const dia = data.getDate().toString().padStart(2, '0');
+        const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+        const ano = data.getFullYear();
+
+        const dataFormatada = `${ano}-${mes}-${dia}`;
+        const periodo = `2025-04-21 a 2025-05-20`;  // fixo por enquanto
+
+        const row = `
+            <tr>
+                <td>${dataFormatada}</td>
+                <td>${reg.inicio}</td>
+                <td>${reg.fim}</td>
+                <td>${(reg.h75 + reg.h100).toFixed(2)}</td>
+                <td>R$ ${reg.valor75.toFixed(2).replace(".", ",")}</td>
+                <td>R$ ${reg.valor100.toFixed(2).replace(".", ",")}</td>
+                <td>R$ ${reg.total.toFixed(2).replace(".", ",")}</td>
+                <td>${reg.justificativa}</td>
+                <td>${reg.usuario}</td>
+                <td>${periodo}</td>
+            </tr>`;
+
+        tabela.innerHTML += row;
+    });
+
+    container.appendChild(tabela);
 }
 
-function limparTudo() {
-  if (confirm('Deseja realmente limpar todos os dados?')) {
-    registros = [];
-    localStorage.removeItem('registros');
-    renderizar();
-  }
+async function exportarExcel() {
+    const registros = JSON.parse(localStorage.getItem(registrosKey)) || [];
+    if (registros.length === 0) return alert("Nenhum registro para exportar!");
+
+    const { Workbook } = window.ExcelJS;
+    const workbook = new Workbook();
+    const template = await fetch("formlario HE - modelo individual 1.xlsx").then(res => res.arrayBuffer());
+
+    const blob = new Blob([template]);
+    const buffer = await blob.arrayBuffer();
+    await workbook.xlsx.load(buffer);
+
+    const worksheet = workbook.worksheets[0];
+    const ultimo = worksheet.lastRow.number + 1;
+
+    const reg = registros[registros.length - 1];
+
+    worksheet.getCell("C6").value = new Date(reg.data);
+    worksheet.getCell("C7").value = reg.inicio;
+    worksheet.getCell("C8").value = reg.fim;
+    worksheet.getCell("C9").value = reg.justificativa;
+
+    const blobFinal = await workbook.xlsx.writeBuffer();
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(new Blob([blobFinal]));
+    a.href = url;
+    a.download = "registro_he.xlsx";
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
-function exportarExcel() {
-  let csv = 'Data,Inicio,Fim,Horas 75%,Horas 100%,Salario\n';
-  registros.forEach(r => {
-    csv += `${r.data},${r.inicio},${r.fim},${r.h75.toFixed(2)},${r.h100.toFixed(2)},${r.salario}\n`;
-  });
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', 'registros_horas_extras.csv');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-renderizar();
+renderizarRegistros();
