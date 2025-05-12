@@ -1,91 +1,121 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("formRegistro");
-    const lista = document.getElementById("listaRegistros");
-    const horas75Span = document.getElementById("horas75");
-    const horas100Span = document.getElementById("horas100");
-    const totalHorasSpan = document.getElementById("totalHoras");
+// Funções utilitárias
+function formatarDataParaPeriodo(dataStr) {
+  const data = new Date(dataStr);
+  let ano = data.getFullYear();
+  let mes = data.getMonth() + 1;
+  let dia = data.getDate();
+  if (dia <= 20) {
+    const fimMes = new Date(ano, mes - 1, 20);
+    const inicio = new Date(fimMes);
+    inicio.setMonth(inicio.getMonth() - 1);
+    inicio.setDate(21);
+    return `${inicio.toLocaleDateString()} a ${fimMes.toLocaleDateString()}`;
+  } else {
+    const inicio = new Date(ano, mes - 1, 21);
+    const fim = new Date(ano, mes, 20);
+    return `${inicio.toLocaleDateString()} a ${fim.toLocaleDateString()}`;
+  }
+}
 
-    let registros = JSON.parse(localStorage.getItem("registros")) || [];
+function calcularHoras(inicio, fim) {
+  const [h1, m1] = inicio.split(":").map(Number);
+  const [h2, m2] = fim.split(":").map(Number);
+  return ((h2 * 60 + m2) - (h1 * 60 + m1)) / 60;
+}
 
-    const turnoInicio = "07:30";
-    const turnoFim = "17:23";
+function isFimDeSemanaOuFeriado(dataStr) {
+  const data = new Date(dataStr);
+  const dia = data.getDay();
+  return dia === 0 || dia === 6;
+}
 
-    function salvarRegistros() {
-        localStorage.setItem("registros", JSON.stringify(registros));
+function calcularValorHora(salario) {
+  const diasUteis = 22;
+  const horasDia = 8.8;
+  return salario / (diasUteis * horasDia);
+}
+
+function formatarValor(valor) {
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+// Salvando dados
+const registros = [];
+
+document.getElementById("registro-form").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const data = document.getElementById("data").value;
+  let inicio = document.getElementById("inicio").value;
+  const fim = document.getElementById("fim").value;
+  const salario = parseFloat(document.getElementById("salario").value);
+  const motivo = document.getElementById("motivo").value;
+  const usuario = document.getElementById("usuario").value;
+
+  if (!isFimDeSemanaOuFeriado(data)) {
+    inicio = "17:24";
+    document.getElementById("inicio").value = inicio;
+  }
+
+  const horas = calcularHoras(inicio, fim);
+  const valorHora = calcularValorHora(salario);
+
+  let valor75 = 0, valor100 = 0;
+  if (!isFimDeSemanaOuFeriado(data)) {
+    if (horas <= 2) valor75 = horas * valorHora * 1.75;
+    else {
+      valor75 = 2 * valorHora * 1.75;
+      valor100 = (horas - 2) * valorHora * 2;
     }
+  } else {
+    valor100 = horas * valorHora * 2;
+  }
 
-    function calcularExtras(inicio, fim, data, salario) {
-        const dia = new Date(data).getDay(); // 0 = domingo, 6 = sábado
-        const isFinalDeSemana = dia === 0 || dia === 6;
+  const total = valor75 + valor100;
+  const periodo = formatarDataParaPeriodo(data);
 
-        const inicioData = new Date(`${data}T${inicio}`);
-        const fimData = new Date(`${data}T${fim}`);
-        let diffHoras = (fimData - inicioData) / (1000 * 60 * 60);
+  const registro = { data, inicio, fim, horas, valor75, valor100, total, motivo, usuario, periodo };
+  registros.push(registro);
 
-        diffHoras = Math.max(0, diffHoras);
+  atualizarTabela();
+});
 
-        let h75 = 0;
-        let h100 = 0;
+function atualizarTabela() {
+  const corpo = document.getElementById("tabela-corpo");
+  corpo.innerHTML = "";
+  let total75 = 0, total100 = 0;
 
-        if (isFinalDeSemana) {
-            h100 = diffHoras;
-        } else {
-            if (diffHoras <= 2) {
-                h75 = diffHoras;
-            } else {
-                h75 = 2;
-                h100 = diffHoras - 2;
-            }
-        }
+  registros.forEach(r => {
+    total75 += r.valor75;
+    total100 += r.valor100;
 
-        return { h75, h100, total: h75 + h100 };
-    }
+    const linha = `<tr>
+      <td>${r.data}</td><td>${r.inicio}</td><td>${r.fim}</td>
+      <td>${r.horas.toFixed(2)}</td><td>${formatarValor(r.valor75)}</td>
+      <td>${formatarValor(r.valor100)}</td><td>${formatarValor(r.total)}</td>
+      <td>${r.motivo}</td><td>${r.usuario}</td><td>${r.periodo}</td>
+    </tr>`;
+    corpo.insertAdjacentHTML("beforeend", linha);
+  });
 
-    function atualizarResumo() {
-        let total75 = 0;
-        let total100 = 0;
+  document.getElementById("acumulado75").textContent = formatarValor(total75);
+  document.getElementById("acumulado100").textContent = formatarValor(total100);
+  document.getElementById("acumuladoTotal").textContent = formatarValor(total75 + total100);
+}
 
-        registros.forEach(r => {
-            total75 += r.h75;
-            total100 += r.h100;
-        });
-
-        horas75Span.textContent = total75.toFixed(2);
-        horas100Span.textContent = total100.toFixed(2);
-        totalHorasSpan.textContent = (total75 + total100).toFixed(2);
-    }
-
-    function renderizarRegistros() {
-        lista.innerHTML = "";
-        registros.forEach((r, index) => {
-            const li = document.createElement("li");
-            li.textContent = `${r.data}: ${r.inicio} - ${r.fim} | 75%: ${r.h75}h, 100%: ${r.h100}h`;
-            lista.appendChild(li);
-        });
-    }
-
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const salario = parseFloat(document.getElementById("salario").value);
-        const data = document.getElementById("data").value;
-        const inicio = document.getElementById("inicio").value;
-        const fim = document.getElementById("fim").value;
-
-        if (!salario || !data || !inicio || !fim) return;
-
-        const calculo = calcularExtras(inicio, fim, data, salario);
-        registros.push({
-            salario, data, inicio, fim,
-            ...calculo
-        });
-
-        salvarRegistros();
-        renderizarRegistros();
-        atualizarResumo();
-        form.reset();
-    });
-
-    // Inicializar na carga
-    renderizarRegistros();
-    atualizarResumo();
+document.getElementById("exportar").addEventListener("click", function() {
+  if (registros.length === 0) return alert("Nenhum dado para exportar.");
+  registros.forEach(r => {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([
+      ["Usuário", r.usuario],
+      ["Data", r.data],
+      ["Hora Início", r.inicio],
+      ["Hora Fim", r.fim],
+      ["Quantidade de Horas", r.horas.toFixed(2)],
+      ["Justificativa", r.motivo]
+    ]);
+    XLSX.utils.book_append_sheet(wb, ws, "Registro");
+    XLSX.writeFile(wb, `formulario_HE_${r.data}.xlsx`);
+  });
 });
