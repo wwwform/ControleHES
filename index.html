@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controlador de Horas Extras Pro</title>
+    <title>Controle de Horas Extras Pro</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Dependências -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 </head>
 <body>
-    <!-- Sistema de Login -->
     <div id="loginContainer" class="login-container">
         <h2>🔒 Login</h2>
-        <input type="text" id="loginUsername" placeholder="Nome de usuário">
+        <input type="text" id="loginUsername" placeholder="Seu nome">
         <button id="btnLogin">Entrar</button>
     </div>
 
-    <!-- Conteúdo Principal -->
     <div id="mainContent" class="container" style="display:none;">
         <div class="header">
             <h1>🕒 Controle de Horas Extras Pro</h1>
-            <button id="btnLogout" class="logout-btn">Sair</button>
+            <div>
+                <span id="userGreeting"></span>
+                <button id="btnLogout" class="logout-btn">Sair</button>
+            </div>
         </div>
-        
+
         <div id="notificacoes" class="notificacao"></div>
 
         <form id="registroForm">
@@ -34,7 +34,8 @@
                 <input type="time" id="horaFim" required>
             </div>
             <textarea id="justificativa" placeholder="Justificativa" required></textarea>
-            <input type="number" id="salarioHora" step="0.01" placeholder="Salário por hora (R$)" required>
+            <input type="number" id="salarioMensal" step="0.01" placeholder="Salário mensal (R$)" required>
+            <input type="number" id="jornadaMensal" step="1" placeholder="Jornada mensal (h) - padrão 220" value="220" required>
             <button type="submit">💾 Salvar Registro</button>
         </form>
 
@@ -46,7 +47,7 @@
         </div>
 
         <div class="resumo">
-            <h2>📊 Resumo do Período (21/{{mês-1}} a 20/{{mês}})</h2>
+            <h2 id="periodoResumo"></h2>
             <div id="valores">
                 <p>75%: R$ <span id="valor75">0.00</span></p>
                 <p>100%: R$ <span id="valor100">0.00</span></p>
