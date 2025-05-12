@@ -1,55 +1,52 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Controle de Horas Extras</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Controle de Horas Extras</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="container">
     <h1>Controle de Horas Extras</h1>
-    <div class="container">
-        <label for="data">Data:</label>
-        <input type="date" id="data">
-        
-        <label for="inicio">Início:</label>
-        <input type="time" id="inicio">
-        
-        <label for="fim">Fim:</label>
-        <input type="time" id="fim">
-        
-        <label for="salario">Salário:</label>
-        <input type="number" id="salario" placeholder="Salário base">
-        
-        <label for="motivo">Justificativa:</label>
-        <input type="text" id="motivo" placeholder="Motivo do extra">
-        
-        <button onclick="salvarRegistro()">Salvar Registro</button>
-        <button onclick="exportarParaExcel()">Exportar para Excel</button>
-    </div>
 
-    <div class="registros-container">
-        <h2>Registros</h2>
-        <div id="soma-geral"></div>
-        <table id="tabela-registros">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Início</th>
-                    <th>Fim</th>
-                    <th>Horas</th>
-                    <th>Valor 75%</th>
-                    <th>Valor 100%</th>
-                    <th>Total</th>
-                    <th>Motivo</th>
-                    <th>Usuário</th>
-                    <th>Período</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+    <label>Salário:</label>
+    <input type="number" id="salario" value="2000" />
 
-    <script src="script.js"></script>
+    <label>Justificativa:</label>
+    <input type="text" id="motivo" />
+
+    <button onclick="salvarRegistro()">Salvar Registro</button>
+    <button onclick="exportarExcel()">Exportar para Excel</button>
+
+    <h2>Registros</h2>
+    <table id="tabela-registros">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Horas</th>
+          <th>Valor 75%</th>
+          <th>Valor 100%</th>
+          <th>Total</th>
+          <th>Motivo</th>
+          <th>Usuário</th>
+          <th>Período</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4"><strong>Totais:</strong></td>
+          <td id="total75">R$ 0,00</td>
+          <td id="total100">R$ 0,00</td>
+          <td id="totalGeral">R$ 0,00</td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
