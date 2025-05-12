@@ -1,30 +1,41 @@
 
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+    color: #333;
 }
 .container {
-  background: #fff;
-  padding: 20px;
-  border-radius: 5px;
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 input, button {
-  display: block;
-  margin: 10px 0;
-  padding: 8px;
+    display: block;
+    margin: 10px 0;
+    padding: 8px;
+    font-size: 14px;
+}
+button {
+    cursor: pointer;
+}
+.registros-container {
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
 }
 th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: center;
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
 }
-thead {
-  background: #333;
-  color: #fff;
+th {
+    background: #333;
+    color: #fff;
 }
