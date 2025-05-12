@@ -2,49 +2,36 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Horas Extras</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h1>Controle de Horas Extras</h1>
+    <form id="extraForm">
+      <label for="data">Data:</label>
+      <input type="date" id="data" required />
 
-    <label>Salário:</label>
-    <input type="number" id="salario" value="2000" />
+      <label for="horaInicio">Início:</label>
+      <input type="time" id="horaInicio" required />
 
-    <label>Justificativa:</label>
-    <input type="text" id="motivo" />
+      <label for="horaFim">Fim:</label>
+      <input type="time" id="horaFim" required />
 
-    <button onclick="salvarRegistro()">Salvar Registro</button>
-    <button onclick="exportarExcel()">Exportar para Excel</button>
+      <label for="salario">Salário mensal (R$):</label>
+      <input type="number" id="salario" required />
 
-    <h2>Registros</h2>
-    <table id="tabela-registros">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Início</th>
-          <th>Fim</th>
-          <th>Horas</th>
-          <th>Valor 75%</th>
-          <th>Valor 100%</th>
-          <th>Total</th>
-          <th>Motivo</th>
-          <th>Usuário</th>
-          <th>Período</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4"><strong>Totais:</strong></td>
-          <td id="total75">R$ 0,00</td>
-          <td id="total100">R$ 0,00</td>
-          <td id="totalGeral">R$ 0,00</td>
-          <td colspan="3"></td>
-        </tr>
-      </tfoot>
-    </table>
+      <button type="submit">Adicionar</button>
+    </form>
+
+    <div class="botoes">
+      <button onclick="exportarExcel()">Exportar para Excel</button>
+      <button onclick="limparTudo()">Limpar Tudo</button>
+    </div>
+
+    <div id="resumo"></div>
+    <div id="registros"></div>
   </div>
 
   <script src="script.js"></script>
