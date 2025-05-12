@@ -1,120 +1,111 @@
-function isWeekend(dateStr) {
-  const date = new Date(dateStr);
-  const day = date.getDay();
-  return day === 0 || day === 6;
-}
+const form = document.getElementById('extraForm');
+const registrosDiv = document.getElementById('registros');
+const resumoDiv = document.getElementById('resumo');
 
-function calcularHoras(inicio, fim) {
-  const [hi, mi] = inicio.split(':').map(Number);
-  const [hf, mf] = fim.split(':').map(Number);
-  const inicioMin = hi * 60 + mi;
-  const fimMin = hf * 60 + mf;
-  const diffMin = fimMin - inicioMin;
-  return diffMin > 0 ? (diffMin / 60).toFixed(2) : 0;
-}
+let registros = JSON.parse(localStorage.getItem('registros')) || [];
 
-function salvarRegistro() {
-  const data = new Date().toISOString().slice(0, 10);
-  const inicio = "17:24";
-  const fim = prompt("Horário de término (HH:mm)", "22:00");
-  const motivo = document.getElementById("motivo").value;
-  const salario = parseFloat(document.getElementById("salario").value);
-  const usuario = "Wildner Barbieri";
-  const periodo = calcularPeriodo(data);
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
 
-  const horas = parseFloat(calcularHoras(inicio, fim));
-  const valorHora = salario / 220;
-  const isFDS = isWeekend(data);
+  const data = document.getElementById('data').value;
+  const inicio = document.getElementById('horaInicio').value;
+  const fim = document.getElementById('horaFim').value;
+  const salario = parseFloat(document.getElementById('salario').value);
+
+  if (!data || !inicio || !fim || isNaN(salario)) return;
+
+  const inicioMin = toMinutes(inicio);
+  const fimMin = toMinutes(fim);
+  const totalMin = fimMin - inicioMin;
 
   let h75 = 0, h100 = 0;
-  if (isFDS) {
-    h100 = horas;
+  if (totalMin <= 120) {
+    h75 = totalMin / 60;
   } else {
-    h75 = Math.min(2, horas);
-    h100 = Math.max(0, horas - 2);
+    h75 = 2;
+    h100 = (totalMin - 120) / 60;
   }
 
-  const v75 = h75 * valorHora * 1.75;
-  const v100 = h100 * valorHora * 2;
-  const total = v75 + v100;
+  registros.push({ data, inicio, fim, h75, h100, salario });
+  localStorage.setItem('registros', JSON.stringify(registros));
 
-  const registro = {
-    data, inicio, fim, horas, v75, v100, total, motivo, usuario, periodo
-  };
+  renderizar();
+  form.reset();
+});
 
-  const registros = JSON.parse(localStorage.getItem("registros") || "[]");
-  registros.push(registro);
-  localStorage.setItem("registros", JSON.stringify(registros));
-
-  atualizarTabela();
+function toMinutes(hora) {
+  const [h, m] = hora.split(':').map(Number);
+  return h * 60 + m;
 }
 
-function calcularPeriodo(dataStr) {
-  const data = new Date(dataStr);
-  let inicio = new Date(data.getFullYear(), data.getMonth(), 21);
-  if (data.getDate() < 21) {
-    inicio.setMonth(inicio.getMonth() - 1);
-  }
-  const fim = new Date(inicio.getFullYear(), inicio.getMonth() + 1, 20);
-  return `${inicio.toISOString().slice(0, 10)} a ${fim.toISOString().slice(0, 10)}`;
-}
-
-function atualizarTabela() {
-  const registros = JSON.parse(localStorage.getItem("registros") || "[]");
-  const tbody = document.querySelector("#tabela-registros tbody");
-  tbody.innerHTML = "";
-
-  let total75 = 0, total100 = 0;
+function calcularResumo(fechamentoDia = 20) {
+  const periodos = {};
 
   registros.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.data}</td>
-      <td>${r.inicio}</td>
-      <td>${r.fim}</td>
-      <td>${r.horas}</td>
-      <td>R$ ${r.v75.toFixed(2)}</td>
-      <td>R$ ${r.v100.toFixed(2)}</td>
-      <td>R$ ${r.total.toFixed(2)}</td>
-      <td>${r.motivo}</td>
-      <td>${r.usuario}</td>
-      <td>${r.periodo}</td>
-    `;
-    tbody.appendChild(tr);
-    total75 += r.v75;
-    total100 += r.v100;
+    const [ano, mes, dia] = r.data.split('-').map(Number);
+    const data = new Date(ano, mes - 1, dia);
+
+    let chave;
+    if (dia <= fechamentoDia) {
+      chave = `${ano}-${String(mes).padStart(2, '0')}`;
+    } else {
+      const next = new Date(ano, mes, 1);
+      chave = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    if (!periodos[chave]) periodos[chave] = [];
+    periodos[chave].push(r);
   });
 
-  document.getElementById("total75").textContent = `R$ ${total75.toFixed(2)}`;
-  document.getElementById("total100").textContent = `R$ ${total100.toFixed(2)}`;
-  document.getElementById("totalGeral").textContent = `R$ ${(total75 + total100).toFixed(2)}`;
+  return Object.entries(periodos).map(([periodo, dados]) => {
+    const h75 = dados.reduce((acc, r) => acc + r.h75, 0);
+    const h100 = dados.reduce((acc, r) => acc + r.h100, 0);
+    const total = h75 + h100;
+    const salario = dados[dados.length - 1].salario;
+    const valorHora = salario / 220;
+    const valorTotal = (h75 * valorHora * 1.75) + (h100 * valorHora * 2);
+
+    return { periodo, h75, h100, total, valorTotal, registros: dados };
+  });
+}
+
+function renderizar() {
+  const resumos = calcularResumo();
+
+  resumoDiv.innerHTML = resumos.map(r => `
+    <h2>Período: ${r.periodo}</h2>
+    <p>Horas com 75%: ${r.h75.toFixed(2)}h</p>
+    <p>Horas com 100%: ${r.h100.toFixed(2)}h</p>
+    <p>Total Geral: ${r.total.toFixed(2)}h</p>
+    <p>Valor total (R$): ${r.valorTotal.toFixed(2)}</p>
+  `).join('');
+
+  registrosDiv.innerHTML = `<h2>Registros</h2><ul>${registros.map(r =>
+    `<li>${r.data}: ${r.inicio} - ${r.fim} | 75%: ${r.h75.toFixed(2)}h, 100%: ${r.h100.toFixed(2)}h</li>`).join('')}</ul>`;
+}
+
+function limparTudo() {
+  if (confirm('Deseja realmente limpar todos os dados?')) {
+    registros = [];
+    localStorage.removeItem('registros');
+    renderizar();
+  }
 }
 
 function exportarExcel() {
-  const registros = JSON.parse(localStorage.getItem("registros") || "[]");
-  if (registros.length === 0) return alert("Sem dados para exportar.");
-
-  const linhas = [
-    ["Data", "Início", "Fim", "Horas", "Valor 75%", "Valor 100%", "Total", "Motivo", "Usuário", "Período"]
-  ];
-
+  let csv = 'Data,Inicio,Fim,Horas 75%,Horas 100%,Salario\n';
   registros.forEach(r => {
-    linhas.push([
-      r.data, r.inicio, r.fim, r.horas,
-      `R$ ${r.v75.toFixed(2)}`, `R$ ${r.v100.toFixed(2)}`, `R$ ${r.total.toFixed(2)}`,
-      r.motivo, r.usuario, r.periodo
-    ]);
+    csv += `${r.data},${r.inicio},${r.fim},${r.h75.toFixed(2)},${r.h100.toFixed(2)},${r.salario}\n`;
   });
 
-  const csv = linhas.map(l => l.join(";")).join("\n");
-  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "horas_extras.csv";
-  a.click();
-  URL.revokeObjectURL(url);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'registros_horas_extras.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
-atualizarTabela();
+renderizar();
