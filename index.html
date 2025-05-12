@@ -1,45 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Controle de Horas Extras</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Horas Extras</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Registro de Horas Extras</h1>
+    <header>
+        <h1>Controle de Horas Extras</h1>
+    </header>
+    <main>
+        <form id="hora-extra-form">
+            <label for="data">Data:</label>
+            <input type="date" id="data" required>
+            
+            <label for="hora-inicio">Hora Início:</label>
+            <input type="time" id="hora-inicio" required>
 
-    <form id="registro-form">
-      <label>Usuário:</label>
-      <input type="text" id="usuario" required />
+            <label for="hora-fim">Hora Fim:</label>
+            <input type="time" id="hora-fim" required>
 
-      <label>Data:</label>
-      <input type="date" id="data" required />
+            <label for="justificativa">Justificativa:</label>
+            <input type="text" id="justificativa" required>
 
-      <label>Hora de Início:</label>
-      <input type="time" id="inicio" />
+            <label for="salario">Salário:</label>
+            <input type="number" id="salario" required>
 
-      <label>Hora de Término:</label>
-      <input type="time" id="fim" required />
+            <button type="submit">Salvar Registro</button>
+        </form>
 
-      <label>Justificativa:</label>
-      <textarea id="justificativa" rows="3" required></textarea>
-
-      <button type="submit">Salvar Registro</button>
-    </form>
-
-    <div class="totalizadores">
-      <h2>Totais</h2>
-      <p>75%: <span id="total75">0h - R$0,00</span></p>
-      <p>100%: <span id="total100">0h - R$0,00</span></p>
-      <p>Total Geral: <span id="totalGeral">0h - R$0,00</span></p>
-    </div>
-
-    <button onclick="exportarRegistros()">Exportar para Excel</button>
-  </div>
-
-  <script src="script.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <section id="relatorio">
+            <h2>Resumo do Período</h2>
+            <p>75% Extra: R$ <span id="valor-75"></span></p>
+            <p>100% Extra: R$ <span id="valor-100"></span></p>
+            <p>Total Geral: R$ <span id="valor-total"></span></p>
+            <button id="exportar">Exportar Dados</button>
+        </section>
+    </main>
+    <script src="script.js"></script>
 </body>
 </html>
