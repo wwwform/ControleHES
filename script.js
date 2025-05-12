@@ -48,3 +48,4 @@ function adicionarRegistro(data, horaInicio, horaFim, justificativa, horasExtras
 function atualizarResumo() {
     // Função para recalcular os totais e atualizar a tela
 }
+
