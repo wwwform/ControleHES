@@ -1,133 +1,83 @@
-function calcularHorasExtras(inicio, fim) {
-  const [hIni, mIni] = inicio.split(":").map(Number);
-  const [hFim, mFim] = fim.split(":").map(Number);
-  const ini = hIni * 60 + mIni;
-  const fimMin = hFim * 60 + mFim;
-  return (fimMin - ini) / 60;
-}
+let registros = [];
+const salarioHora = 10; // ajuste conforme necessário
+const feriados = ["2025-01-01", "2025-04-21", "2025-05-01", "2025-09-07", "2025-10-12", "2025-11-15", "2025-12-25"];
 
-function salvarRegistro() {
-  const salario = parseFloat(document.getElementById("salario").value);
-  const justificativa = document.getElementById("justificativa").value;
+document.getElementById("data").addEventListener("change", function () {
+  const dataSelecionada = new Date(this.value);
+  const diaSemana = dataSelecionada.getDay();
+  const isFeriado = feriados.includes(this.value);
+
+  if (diaSemana >= 1 && diaSemana <= 5 && !isFeriado) {
+    document.getElementById("inicio").value = "17:24";
+    document.getElementById("inicio").readOnly = true;
+  } else {
+    document.getElementById("inicio").value = "";
+    document.getElementById("inicio").readOnly = false;
+  }
+});
+
+document.getElementById("registro-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const usuario = document.getElementById("usuario").value;
   const data = document.getElementById("data").value;
   const inicio = document.getElementById("inicio").value;
   const fim = document.getElementById("fim").value;
-  const usuario = document.getElementById("usuario").value;
+  const justificativa = document.getElementById("justificativa").value;
 
-  if (!salario || !justificativa || !data || !inicio || !fim || !usuario) {
-    alert("Preencha todos os campos.");
-    return;
+  const h1 = new Date(`1970-01-01T${inicio}:00`);
+  const h2 = new Date(`1970-01-01T${fim}:00`);
+  const diffMs = h2 - h1;
+  const horas = diffMs / (1000 * 60 * 60);
+
+  const diaSemana = new Date(data).getDay();
+  const isFeriado = feriados.includes(data);
+
+  let tipo = "75%";
+  if (horas > 2 || diaSemana === 0 || diaSemana === 6 || isFeriado) {
+    tipo = "100%";
   }
 
-  const horas = calcularHorasExtras(inicio, fim);
-  const valorHora = salario / 220;
+  registros.push({ usuario, data, inicio, fim, justificativa, horas, tipo });
+  atualizarTotais();
+  this.reset();
+});
 
-  const dia = new Date(data).getDay();
-  let valor75 = 0, valor100 = 0;
-
-  if (dia === 0 || dia === 6) {
-    valor100 = horas * valorHora * 2;
-  } else {
-    if (horas <= 2) {
-      valor75 = horas * valorHora * 1.75;
-    } else {
-      valor75 = 2 * valorHora * 1.75;
-      valor100 = (horas - 2) * valorHora * 2;
-    }
-  }
-
-  const total = valor75 + valor100;
-  const periodo = calcularPeriodo(data);
-
-  const registro = {
-    data, inicio, fim, horas, valor75, valor100, total,
-    justificativa, usuario, periodo
-  };
-
-  const registros = JSON.parse(localStorage.getItem("registros") || "[]");
-  registros.push(registro);
-  localStorage.setItem("registros", JSON.stringify(registros));
-
-  renderizarTabela();
-}
-
-function calcularPeriodo(dataStr) {
-  const data = new Date(dataStr);
-  const ano = data.getFullYear();
-  const mes = data.getMonth();
-  const dia = data.getDate();
-  let inicio, fim;
-
-  if (dia <= 20) {
-    inicio = new Date(ano, mes - 1, 21);
-    fim = new Date(ano, mes, 20);
-  } else {
-    inicio = new Date(ano, mes, 21);
-    fim = new Date(ano, mes + 1, 20);
-  }
-
-  return `${inicio.toISOString().split("T")[0]} a ${fim.toISOString().split("T")[0]}`;
-}
-
-function renderizarTabela() {
-  const tbody = document.getElementById("corpo-tabela");
-  tbody.innerHTML = "";
-  let t75 = 0, t100 = 0, tGeral = 0;
-
-  const registros = JSON.parse(localStorage.getItem("registros") || "[]");
+function atualizarTotais() {
+  let total75 = 0, total100 = 0;
 
   registros.forEach(reg => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${reg.data}</td>
-      <td>${reg.inicio}</td>
-      <td>${reg.fim}</td>
-      <td>${reg.horas.toFixed(2)}</td>
-      <td>R$ ${reg.valor75.toFixed(2)}</td>
-      <td>R$ ${reg.valor100.toFixed(2)}</td>
-      <td>R$ ${reg.total.toFixed(2)}</td>
-      <td>${reg.justificativa}</td>
-      <td>${reg.usuario}</td>
-      <td>${reg.periodo}</td>
-    `;
-    tbody.appendChild(tr);
-
-    t75 += reg.valor75;
-    t100 += reg.valor100;
-    tGeral += reg.total;
+    if (reg.tipo === "75%") total75 += reg.horas;
+    else total100 += reg.horas;
   });
 
-  document.getElementById("total-75").textContent = `R$ ${t75.toFixed(2)}`;
-  document.getElementById("total-100").textContent = `R$ ${t100.toFixed(2)}`;
-  document.getElementById("total-geral").textContent = `R$ ${tGeral.toFixed(2)}`;
+  const totalGeral = total75 + total100;
+
+  document.getElementById("total75").innerText = `${total75}h - R$${(total75 * salarioHora * 1.75).toFixed(2)}`;
+  document.getElementById("total100").innerText = `${total100}h - R$${(total100 * salarioHora * 2.0).toFixed(2)}`;
+  document.getElementById("totalGeral").innerText = `${totalGeral}h - R$${((total75 * 1.75 + total100 * 2.0) * salarioHora).toFixed(2)}`;
 }
 
-function exportarParaExcel() {
-  const registros = JSON.parse(localStorage.getItem("registros") || "[]");
-  if (registros.length === 0) {
-    alert("Nenhum registro para exportar.");
-    return;
-  }
+function exportarRegistros() {
+  registros.forEach(reg => {
+    const url = `https://docs.google.com/forms/d/e/EXCEL_MODEL_FORM/export?format=xlsx`;
 
-  const cabecalho = ["Data", "Início", "Fim", "Horas", "Valor 75%", "Valor 100%", "Total", "Motivo", "Usuário", "Período"];
-  const linhas = registros.map(r => [
-    r.data, r.inicio, r.fim, r.horas.toFixed(2),
-    `R$ ${r.valor75.toFixed(2)}`,
-    `R$ ${r.valor100.toFixed(2)}`,
-    `R$ ${r.total.toFixed(2)}`,
-    r.justificativa, r.usuario, r.periodo
-  ]);
-
-  let csv = cabecalho.join(",") + "\n" + linhas.map(l => l.join(",")).join("\n");
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "controle_horas_extras.csv";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+    fetch("/modelo/formlario%20HE%20-%20modelo%20individual%201.xlsx")
+      .then(res => res.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const zip = new JSZip();
+          zip.loadAsync(reader.result).then(zip => {
+            const workbook = XLSX.read(reader.result, { type: "binary" });
+            const ws = workbook.Sheets[workbook.SheetNames[0]];
+            ws["B7"].v = reg.data;
+            ws["F7"].v = reg.inicio;
+            ws["K7"].v = reg.fim;
+            ws["C9"].v = reg.justificativa;
+            XLSX.writeFile(workbook, `HE_${reg.data}.xlsx`);
+          });
+        };
+        reader.readAsBinaryString(blob);
+      });
 }
-
-window.onload = renderizarTabela;
