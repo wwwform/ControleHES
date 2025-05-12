@@ -1,52 +1,68 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 20px;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
 }
-.container {
-  background: #fff;
-  padding: 20px;
-  border-radius: 5px;
-  max-width: 1200px;
-  margin: auto;
+
+header {
+    background-color: #0073e6;
+    color: white;
+    text-align: center;
+    padding: 20px;
 }
+
+main {
+    width: 80%;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
 label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
+    margin-top: 10px;
+    font-weight: bold;
 }
+
 input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  box-sizing: border-box;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
-.botoes {
-  display: flex;
-  gap: 10px;
-}
+
 button {
-  padding: 10px;
-  font-size: 16px;
-  cursor: pointer;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #0073e6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+
+button:hover {
+    background-color: #005bb5;
 }
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
+
+#relatorio {
+    margin-top: 30px;
+    padding: 20px;
+    background: #eee;
+    border-radius: 5px;
 }
-thead {
-  background-color: #333;
-  color: #fff;
+
+#exportar {
+    background-color: #28a745;
 }
-tfoot {
-  background-color: #eee;
-  font-weight: bold;
+
+#exportar:hover {
+    background-color: #218838;
 }
