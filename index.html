@@ -3,32 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controlador de Horas Extras</title>
+    <title>Controlador de Horas Extras Pro</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Dependências -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <h1>🕒 Controle de Horas Extras</h1>
+    <!-- Sistema de Login -->
+    <div id="loginContainer" class="login-container">
+        <h2>🔒 Login</h2>
+        <input type="text" id="loginUsername" placeholder="Nome de usuário">
+        <button id="btnLogin">Entrar</button>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div id="mainContent" class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <h1>🕒 Controle de Horas Extras Pro</h1>
+            <button id="btnLogout" class="logout-btn">Sair</button>
+        </div>
         
-        <!-- Formulário de Registro -->
+        <!-- Notificações -->
+        <div id="notificacoes" class="notificacao"></div>
+
+        <!-- Formulário -->
         <form id="registroForm">
-            <input type="text" id="nome" placeholder="Seu nome" required>
             <input type="date" id="data" required>
             <div class="time-inputs">
                 <input type="time" id="horaInicio" required>
                 <input type="time" id="horaFim" required>
             </div>
             <textarea id="justificativa" placeholder="Justificativa" required></textarea>
-            <input type="number" id="salarioHora" step="0.01" placeholder="Salário por hora" required>
+            <input type="number" id="salarioHora" step="0.01" placeholder="Salário por hora (R$)" required>
             <button type="submit">💾 Salvar Registro</button>
         </form>
 
-        <!-- Visualização de Dados -->
+        <!-- Backup -->
+        <div id="backupSection">
+            <h3>🔰 Backup & Restauração</h3>
+            <button onclick="exportarBackup()">Exportar Backup</button>
+            <input type="file" id="btnImportBackup" accept=".json">
+            <label for="btnImportBackup" class="file-label">Importar Backup</label>
+        </div>
+
+        <!-- Resumo -->
         <div class="resumo">
-            <h2>📊 Resumo do Período</h2>
+            <h2>📊 Resumo do Período (21/{{mês-1}} a 20/{{mês}})</h2>
             <div id="valores">
                 <p>75%: R$ <span id="valor75">0.00</span></p>
                 <p>100%: R$ <span id="valor100">0.00</span></p>
@@ -41,7 +64,7 @@
             </div>
         </div>
 
-        <!-- Tabela de Registros -->
+        <!-- Tabela -->
         <table id="registros">
             <thead>
                 <tr>
@@ -51,10 +74,10 @@
                     <th>Justificativa</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Dados serão inseridos via JavaScript -->
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
