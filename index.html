@@ -3,42 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Horas Extras</title>
+    <title>Controlador de Horas Extras</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <header>
-        <h1>Controle de Horas Extras</h1>
-    </header>
-    <main>
-        <form id="hora-extra-form">
-            <label for="data">Data:</label>
+    <div class="container">
+        <h1>🕒 Controle de Horas Extras</h1>
+        
+        <!-- Formulário de Registro -->
+        <form id="registroForm">
+            <input type="text" id="nome" placeholder="Seu nome" required>
             <input type="date" id="data" required>
-            
-            <label for="hora-inicio">Hora Início:</label>
-            <input type="time" id="hora-inicio" required>
-
-            <label for="hora-fim">Hora Fim:</label>
-            <input type="time" id="hora-fim" required>
-
-            <label for="justificativa">Justificativa:</label>
-            <input type="text" id="justificativa" required>
-
-            <label for="salario">Salário:</label>
-            <input type="number" id="salario" required>
-
-            <button type="submit">Salvar Registro</button>
+            <div class="time-inputs">
+                <input type="time" id="horaInicio" required>
+                <input type="time" id="horaFim" required>
+            </div>
+            <textarea id="justificativa" placeholder="Justificativa" required></textarea>
+            <input type="number" id="salarioHora" step="0.01" placeholder="Salário por hora" required>
+            <button type="submit">💾 Salvar Registro</button>
         </form>
 
-        <section id="relatorio">
-            <h2>Resumo do Período</h2>
-            <p>75% Extra: R$ <span id="valor-75"></span></p>
-            <p>100% Extra: R$ <span id="valor-100"></span></p>
-            <p>Total Geral: R$ <span id="valor-total"></span></p>
-            <button id="exportar">Exportar Dados</button>
-        </section>
-    </main>
-    <script src="script.js"></script>
+        <!-- Visualização de Dados -->
+        <div class="resumo">
+            <h2>📊 Resumo do Período</h2>
+            <div id="valores">
+                <p>75%: R$ <span id="valor75">0.00</span></p>
+                <p>100%: R$ <span id="valor100">0.00</span></p>
+                <p>Total: R$ <span id="totalGeral">0.00</span></p>
+            </div>
+            <div class="botoes-exportacao">
+                <button onclick="exportarExcel()">📊 Excel</button>
+                <button onclick="exportarPDF()">📄 PDF</button>
+                <button onclick="exportarWord()">📑 Word</button>
+            </div>
+        </div>
+
+        <!-- Tabela de Registros -->
+        <table id="registros">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Horas</th>
+                    <th>Valor</th>
+                    <th>Justificativa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dados serão inseridos via JavaScript -->
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
-
