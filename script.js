@@ -1,48 +1,39 @@
-class GerenciadorHorasPro {
+class GerenciadorHoras {
     constructor() {
-        this.currentUser = JSON.parse(localStorage.getItem('currentUserHE')) || null;
-        this.registros = this.carregarRegistrosUsuario();
-        this.feriados = JSON.parse(localStorage.getItem('feriadosHE')) || [];
-        this.filtroAtivo = false;
-        this.filtroInicio = null;
-        this.filtroFim = null;
+        this.registros = JSON.parse(localStorage.getItem('registrosHE')) || [];
+        this.feriados = [];
+        this.currentUser = null;
         this.init();
     }
 
     async init() {
         await this.carregarFeriadosAPI();
         this.configurarEventos();
-        this.verificarNotificacoesPeriodo();
-        this.renderizarTabela();
-        if (!this.currentUser) this.mostrarLogin();
-        else this.ocultarLogin();
+        this.verificarLogin();
+    }
+
+    verificarLogin() {
+        const user = localStorage.getItem('currentUserHE');
+        if (user) {
+            this.currentUser = JSON.parse(user);
+            this.ocultarLogin();
+            this.renderizarTabela();
+        }
     }
 
     configurarEventos() {
-        document.getElementById('registroForm').addEventListener('submit', (e) => this.salvarRegistro(e));
         document.getElementById('btnLogin').addEventListener('click', () => this.realizarLogin());
         document.getElementById('btnLogout').addEventListener('click', () => this.realizarLogout());
+        document.getElementById('registroForm').addEventListener('submit', (e) => this.salvarRegistro(e));
         document.getElementById('btnImportBackup').addEventListener('change', (e) => this.importarBackup(e));
     }
 
     async carregarFeriadosAPI() {
         try {
-            const ano = new Date().getFullYear();
-            const response = await fetch(`https://brasilapi.com.br/api/feriados/v1/${ano}`);
-            if (!response.ok) throw new Error('Falha na API');
-            const data = await response.json();
-            this.feriados = data.map(f => f.date);
-            localStorage.setItem('feriadosHE', JSON.stringify(this.feriados));
+            const response = await fetch(`https://brasilapi.com.br/api/feriados/v1/${new Date().getFullYear()}`);
+            this.feriados = (await response.json()).map(f => f.date);
         } catch (error) {
-            if (!this.feriados || this.feriados.length === 0) {
-                const anoAtual = new Date().getFullYear();
-                this.feriados = [
-                    `${anoAtual}-01-01`, `${anoAtual}-04-21`, `${anoAtual}-05-01`,
-                    `${anoAtual}-09-07`, `${anoAtual}-10-12`, `${anoAtual}-11-02`,
-                    `${anoAtual}-11-15`, `${anoAtual}-12-25`
-                ];
-                localStorage.setItem('feriadosHE', JSON.stringify(this.feriados));
-            }
+            this.feriados = [];
         }
     }
 
@@ -51,10 +42,9 @@ class GerenciadorHorasPro {
         if (username) {
             this.currentUser = username;
             localStorage.setItem('currentUserHE', JSON.stringify(username));
-            this.registros = this.carregarRegistrosUsuario();
             this.ocultarLogin();
             this.renderizarTabela();
-            document.getElementById('userGreeting').textContent = `Olá, ${username}!`;
+            this.carregarSalarioUsuario();
         }
     }
 
@@ -77,246 +67,84 @@ class GerenciadorHorasPro {
         document.getElementById('userGreeting').textContent = `Olá, ${this.currentUser}!`;
     }
 
-    carregarRegistrosUsuario() {
-        return this.currentUser ?
-            JSON.parse(localStorage.getItem(`registrosHE_${this.currentUser}`)) || [] : [];
+    carregarSalarioUsuario() {
+        const salario = localStorage.getItem(`salarioHE_${this.currentUser}`);
+        document.getElementById('salarioAtual').value = salario || '';
+    }
+
+    atualizarSalario() {
+        const salario = parseFloat(document.getElementById('salarioAtual').value);
+        if (!isNaN(salario)) {
+            localStorage.setItem(`salarioHE_${this.currentUser}`, salario);
+            alert('Salário atualizado!');
+        }
     }
 
     salvarRegistro(e) {
         e.preventDefault();
-        if (!this.currentUser) return alert('Faça login primeiro!');
-        const dataInput = document.getElementById('data').value;
-        const [ano, mes, dia] = dataInput.split('-');
-        const dataCorrigida = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+        const salario = parseFloat(localStorage.getItem(`salarioHE_${this.currentUser}`));
+        if (isNaN(salario)) {
+            alert('Configure o salário primeiro!');
+            return;
+        }
 
         const novoRegistro = {
             id: Date.now(),
             nome: this.currentUser,
-            data: dataCorrigida,
+            data: document.getElementById('data').value,
             inicio: document.getElementById('horaInicio').value,
             fim: document.getElementById('horaFim').value,
             justificativa: document.getElementById('justificativa').value,
-            salarioMensal: parseFloat(document.getElementById('salarioMensal').value)
+            salarioMensal: salario
         };
+
         this.registros.push(novoRegistro);
-        localStorage.setItem(`registrosHE_${this.currentUser}`, JSON.stringify(this.registros));
+        localStorage.setItem('registrosHE', JSON.stringify(this.registros));
         this.renderizarTabela();
         e.target.reset();
-    }
-
-    verificarNotificacoesPeriodo() {
-        const hoje = new Date();
-        const dia = hoje.getDate();
-        const divNotificacoes = document.getElementById('notificacoes');
-        if (dia >= 18 && dia <= 20) {
-            divNotificacoes.style.display = 'block';
-            divNotificacoes.innerHTML = `⚠️ Faltam ${20 - dia} dias para o fechamento do período!`;
-        } else {
-            divNotificacoes.style.display = 'none';
-        }
-    }
-
-    exportarBackup() {
-        if (!this.currentUser || this.registros.length === 0) {
-            alert('Não há dados para exportar.');
-            return;
-        }
-        const blob = new Blob([JSON.stringify(this.registros)], {type: 'application/json'});
-        saveAs(blob, `backupHE_${this.currentUser}_${new Date().toISOString().slice(0,10)}.json`);
-    }
-
-    importarBackup(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const dados = JSON.parse(event.target.result);
-                    if (Array.isArray(dados)) {
-                        this.registros = dados;
-                        localStorage.setItem(`registrosHE_${this.currentUser}`, JSON.stringify(dados));
-                        this.renderizarTabela();
-                        alert('Backup importado com sucesso!');
-                    } else {
-                        throw new Error('Formato inválido');
-                    }
-                } catch (error) {
-                    alert('Arquivo de backup inválido!');
-                }
-            };
-            reader.readAsText(file);
-        }
-    }
-
-    calcularPeriodo(data) {
-        const date = new Date(data + 'T00:00:00');
-        if (date.getDate() >= 21) {
-            const mesAtual = date.getMonth();
-            const mesSeguinte = (mesAtual + 1) % 12;
-            return `${mesAtual}-${mesSeguinte}`;
-        } else {
-            const mesAtual = date.getMonth();
-            const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
-            return `${mesAnterior}-${mesAtual}`;
-        }
-    }
-
-    getPeriodoAtual() {
-        const hoje = new Date();
-        let mesInicio, mesFim, anoInicio, anoFim;
-        if (hoje.getDate() >= 21) {
-            mesInicio = hoje.getMonth() + 1;
-            mesFim = (hoje.getMonth() + 2 > 12) ? (hoje.getMonth() + 2 - 12) : hoje.getMonth() + 2;
-            anoInicio = hoje.getFullYear();
-            anoFim = (hoje.getMonth() + 1 === 12) ? hoje.getFullYear() + 1 : hoje.getFullYear();
-        } else {
-            mesInicio = hoje.getMonth();
-            mesFim = hoje.getMonth() + 1;
-            anoInicio = (hoje.getMonth() === 0) ? hoje.getFullYear() - 1 : hoje.getFullYear();
-            anoFim = hoje.getFullYear();
-        }
-        return {
-            texto: `📊 Resumo do Período (21/${String(mesInicio).padStart(2, '0')}/${anoInicio} a 20/${String(mesFim).padStart(2, '0')}/${anoFim})`,
-            chave: `${mesInicio - 1}-${mesFim - 1}`
-        };
-    }
-
-    calcularValor(registro) {
-        const JORNADA_MENSAL = 220;
-        const valorHora = registro.salarioMensal / JORNADA_MENSAL;
-
-        const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
-        const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
-
-        let minutosTotais = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
-        if (minutosTotais < 0) minutosTotais += 1440;
-
-        const horasTotais = minutosTotais / 60;
-
-        const [ano, mes, dia] = registro.data.split('-').map(Number);
-        const data = new Date(ano, mes - 1, dia);
-
-        const diaSemana = data.getDay();
-        const isFimSemana = diaSemana === 0 || diaSemana === 6;
-        const isFeriado = this.feriados.includes(registro.data);
-
-        let valor75 = 0;
-        let valor100 = 0;
-
-        if (isFimSemana || isFeriado) {
-            valor100 = horasTotais * valorHora * 2;
-        } else {
-            if (horasTotais <= 2) {
-                valor75 = horasTotais * valorHora * 1.75;
-            } else {
-                valor75 = 2 * valorHora * 1.75;
-                valor100 = (horasTotais - 2) * valorHora * 2;
-            }
-        }
-
-        return {
-            valor75: valor75,
-            valor100: valor100,
-            total: valor75 + valor100,
-            horas: horasTotais,
-            tipoExtra: (isFimSemana || isFeriado) ? '100%' : (horasTotais <= 2 ? '75%' : '75%/100%')
-        };
-    }
-
-    excluirRegistro(id) {
-        if (confirm('Tem certeza que deseja excluir este registro?')) {
-            this.registros = this.registros.filter(r => r.id !== id);
-            localStorage.setItem(`registrosHE_${this.currentUser}`, JSON.stringify(this.registros));
-            this.renderizarTabela();
-        }
-    }
-
-    filtrarPorPeriodoPersonalizado(inicio, fim) {
-        this.filtroAtivo = true;
-        this.filtroInicio = inicio;
-        this.filtroFim = fim;
-        this.renderizarTabela();
-    }
-
-    filtrarPorMes(mesAno) {
-        if (!mesAno) return;
-        const [ano, mes] = mesAno.split('-');
-        const primeiroDia = new Date(ano, mes - 1, 1);
-        const ultimoDia = new Date(ano, mes, 0);
-        this.filtrarPorPeriodoPersonalizado(primeiroDia, ultimoDia);
-    }
-
-    limparFiltros() {
-        this.filtroAtivo = false;
-        this.filtroInicio = null;
-        this.filtroFim = null;
-        document.getElementById('filtroMes').value = '';
-        document.getElementById('filtroInicio').value = '';
-        document.getElementById('filtroFim').value = '';
-        this.renderizarTabela();
     }
 
     renderizarTabela() {
         const tbody = document.querySelector('#registros tbody');
         tbody.innerHTML = '';
-        let total75 = 0;
-        let total100 = 0;
-        let totalGeral = 0;
-
-        const periodo = this.getPeriodoAtual();
-        document.getElementById('periodoResumo').textContent = periodo.texto;
-
-        let registrosFiltrados = this.registros.slice().sort((a, b) => a.data.localeCompare(b.data));
-
-        if (this.filtroAtivo && this.filtroInicio && this.filtroFim) {
-            registrosFiltrados = registrosFiltrados.filter(r => {
-                const dataRegistro = new Date(r.data + 'T00:00:00');
-                return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
-            });
-        } else {
-            registrosFiltrados = registrosFiltrados.filter(r => this.calcularPeriodo(r.data) === periodo.chave);
-        }
-
-        if (registrosFiltrados.length === 0) {
-            document.getElementById('valor75').textContent = '0.00';
-            document.getElementById('valor100').textContent = '0.00';
-            document.getElementById('totalGeral').textContent = '0.00';
-            return;
-        }
-
-        registrosFiltrados.forEach(registro => {
-            const result = this.calcularValor(registro);
-
-            total75 += result.valor75;
-            total100 += result.valor100;
-            totalGeral += result.total;
-
-            const [ano, mes, dia] = registro.data.split('-').map(Number);
-            const dataObj = new Date(ano, mes - 1, dia);
-
-            let tipoExtraTexto = '';
-            if (result.tipoExtra === '100%') {
-                tipoExtraTexto = '100%';
-            } else if (result.tipoExtra === '75%') {
-                tipoExtraTexto = '75%';
-            } else {
-                tipoExtraTexto = '75%/100%';
-            }
-
+        this.registros.forEach(registro => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${dataObj.toLocaleDateString('pt-BR')}</td>
+                <td>${registro.data}</td>
                 <td>${registro.inicio} - ${registro.fim}</td>
-                <td>R$ ${result.total.toFixed(2)} <span style="font-size:0.9em;color:#888;">${tipoExtraTexto}</span></td>
+                <td>R$ ${this.calcularValor(registro).toFixed(2)}</td>
                 <td>${registro.justificativa}</td>
-                <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})" title="Excluir">🗑️</button></td>
+                <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})">🗑️</button></td>
             `;
             tbody.appendChild(tr);
         });
+    }
 
-        document.getElementById('valor75').textContent = total75.toFixed(2);
-        document.getElementById('valor100').textContent = total100.toFixed(2);
-        document.getElementById('totalGeral').textContent = totalGeral.toFixed(2);
+    calcularValor(registro) {
+        const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
+        const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
+        let minutos = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
+        if (minutos < 0) minutos += 1440;
+        const horas = minutos / 60;
+        const isFimSemana = [0, 6].includes(new Date(registro.data).getDay());
+        const isFeriado = this.feriados.includes(registro.data);
+        let valor = 0;
+
+        if (isFimSemana || isFeriado) {
+            valor = horas * registro.salarioMensal * 2;
+        } else {
+            const normal = Math.min(horas, 2);
+            const extra = Math.max(horas - 2, 0);
+            valor = (normal * 1.75 + extra * 2) * registro.salarioMensal;
+        }
+
+        return valor;
+    }
+
+    excluirRegistro(id) {
+        this.registros = this.registros.filter(r => r.id !== id);
+        localStorage.setItem('registrosHE', JSON.stringify(this.registros));
+        this.renderizarTabela();
     }
 
     // Exportações
@@ -522,6 +350,11 @@ class GerenciadorHorasPro {
     }
 }
 
+
+window.gerenciador = new GerenciadorHoras();
+window.addEventListener('DOMContentLoaded', () => {
+    gerenciador.init();
+});
 // Inicialização
 const gerenciador = new GerenciadorHorasPro();
 window.exportarExcel = () => gerenciador.exportarExcel();
