@@ -320,3 +320,21 @@ tr:hover {
     transform: scale(1.2);
     color: #b71c1c;
 }
+/* Novos estilos adicionados */
+.config-salario {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.config-salario h3 {
+    margin-top: 0;
+    color: var(--primary);
+}
+
+.config-salario input {
+    margin-right: 10px;
+    padding: 8px;
+    width: 200px;
+}
