@@ -16,60 +16,7 @@ class GerenciadorHorasPro {
         this.renderizarTabela();
         if (!this.currentUser) this.mostrarLogin();
         else this.ocultarLogin();
-        this.carregarSalarioUsuario(); // Novo método
     }
-
-    // ... (Métodos existentes mantidos)
-
-    carregarSalarioUsuario() {
-        if (this.currentUser) {
-            const salario = localStorage.getItem(`salarioHE_${this.currentUser}`);
-            document.getElementById('salarioAtual').value = salario || '';
-        }
-    }
-
-    atualizarSalario() {
-        const novoSalario = parseFloat(document.getElementById('salarioAtual').value);
-        if (!isNaN(novoSalario)) {
-            localStorage.setItem(`salarioHE_${this.currentUser}`, novoSalario);
-            alert('Salário atualizado com sucesso!');
-        } else {
-            alert('Insira um valor válido para o salário.');
-        }
-    }
-
-    salvarRegistro(e) {
-        e.preventDefault();
-        if (!this.currentUser) return alert('Faça login primeiro!');
-        
-        const salarioAtual = parseFloat(localStorage.getItem(`salarioHE_${this.currentUser}`));
-        if (isNaN(salarioAtual)) {
-            alert('Configure seu salário antes de registrar horas!');
-            return;
-        }
-
-        const novoRegistro = {
-            id: Date.now(),
-            nome: this.currentUser,
-            data: document.getElementById('data').value,
-            inicio: document.getElementById('horaInicio').value,
-            fim: document.getElementById('horaFim').value,
-            justificativa: document.getElementById('justificativa').value,
-            salarioMensal: salarioAtual // Usa o salário salvo
-        };
-
-        this.registros.push(novoRegistro);
-        localStorage.setItem(`registrosHE_${this.currentUser}`, JSON.stringify(this.registros));
-        this.renderizarTabela();
-        e.target.reset();
-    }
-
-    // ... (Métodos de exportação/importação atualizados para incluir salário)
-}
-
-// Novas funções globais
-window.atualizarSalario = () => gerenciador.atualizarSalario();
-
 
     configurarEventos() {
         document.getElementById('registroForm').addEventListener('submit', (e) => this.salvarRegistro(e));
