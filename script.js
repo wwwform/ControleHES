@@ -31,7 +31,6 @@ class GerenciadorHorasPro {
             this.feriados = data.map(f => f.date);
             localStorage.setItem('feriadosHE', JSON.stringify(this.feriados));
         } catch (error) {
-            // fallback: feriados fixos se API falhar
             if (!this.feriados || this.feriados.length === 0) {
                 const anoAtual = new Date().getFullYear();
                 this.feriados = [
@@ -80,13 +79,11 @@ class GerenciadorHorasPro {
             JSON.parse(localStorage.getItem(`registrosHE_${this.currentUser}`)) || [] : [];
     }
 
-    // CORREÇÃO: Salva a data corretamente, sem problemas de fuso horário
     salvarRegistro(e) {
         e.preventDefault();
         if (!this.currentUser) return alert('Faça login primeiro!');
         const dataInput = document.getElementById('data').value;
         const [ano, mes, dia] = dataInput.split('-');
-        // Salva a data sempre no formato yyyy-mm-dd
         const dataCorrigida = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
 
         const novoRegistro = {
@@ -181,7 +178,6 @@ class GerenciadorHorasPro {
         };
     }
 
-    // CÁLCULO CORRETO DAS HORAS EXTRAS
     calcularValor(registro) {
         const JORNADA_MENSAL = 220;
         const valorHora = registro.salarioMensal / JORNADA_MENSAL;
@@ -194,7 +190,6 @@ class GerenciadorHorasPro {
 
         const horasTotais = minutosTotais / 60;
 
-        // Corrige a data para não ter problema de fuso
         const [ano, mes, dia] = registro.data.split('-').map(Number);
         const data = new Date(ano, mes - 1, dia);
 
@@ -465,8 +460,6 @@ class GerenciadorHorasPro {
 
 // Inicialização
 const gerenciador = new GerenciadorHorasPro();
-
-// Interface Global
 window.exportarExcel = () => gerenciador.exportarExcel();
 window.exportarPDF = () => gerenciador.exportarPDF();
 window.exportarWord = () => gerenciador.exportarWord();
