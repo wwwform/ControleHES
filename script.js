@@ -3,6 +3,9 @@ class GerenciadorHorasPro {
         this.currentUser = JSON.parse(localStorage.getItem('currentUserHE')) || null;
         this.registros = this.carregarRegistrosUsuario();
         this.feriados = JSON.parse(localStorage.getItem('feriadosHE')) || [];
+        this.filtroAtivo = false;
+        this.filtroInicio = null;
+        this.filtroFim = null;
         this.init();
     }
 
@@ -216,8 +219,41 @@ class GerenciadorHorasPro {
             valor100: valor100,
             total: valor75 + valor100,
             horas: horasTotais,
-            tipoExtra: (isFimSemana || isFeriado) ? '100%' : (horasTotais <= 2 ? '75%' : 'misto')
+            tipoExtra: (isFimSemana || isFeriado) ? '100%' : (horasTotais <= 2 ? '75%' : '75%/100%')
         };
+    }
+
+    excluirRegistro(id) {
+        if (confirm('Tem certeza que deseja excluir este registro?')) {
+            this.registros = this.registros.filter(r => r.id !== id);
+            localStorage.setItem(`registrosHE_${this.currentUser}`, JSON.stringify(this.registros));
+            this.renderizarTabela();
+        }
+    }
+
+    filtrarPorPeriodoPersonalizado(inicio, fim) {
+        this.filtroAtivo = true;
+        this.filtroInicio = inicio;
+        this.filtroFim = fim;
+        this.renderizarTabela();
+    }
+
+    filtrarPorMes(mesAno) {
+        if (!mesAno) return;
+        const [ano, mes] = mesAno.split('-');
+        const primeiroDia = new Date(ano, mes - 1, 1);
+        const ultimoDia = new Date(ano, mes, 0);
+        this.filtrarPorPeriodoPersonalizado(primeiroDia, ultimoDia);
+    }
+
+    limparFiltros() {
+        this.filtroAtivo = false;
+        this.filtroInicio = null;
+        this.filtroFim = null;
+        document.getElementById('filtroMes').value = '';
+        document.getElementById('filtroInicio').value = '';
+        document.getElementById('filtroFim').value = '';
+        this.renderizarTabela();
     }
 
     renderizarTabela() {
@@ -230,16 +266,25 @@ class GerenciadorHorasPro {
         const periodo = this.getPeriodoAtual();
         document.getElementById('periodoResumo').textContent = periodo.texto;
 
-        const registrosPeriodo = this.registros.filter(r => this.calcularPeriodo(r.data) === periodo.chave);
+        let registrosFiltrados = this.registros.slice().sort((a, b) => a.data.localeCompare(b.data));
 
-        if (registrosPeriodo.length === 0) {
+        if (this.filtroAtivo && this.filtroInicio && this.filtroFim) {
+            registrosFiltrados = registrosFiltrados.filter(r => {
+                const dataRegistro = new Date(r.data + 'T00:00:00');
+                return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
+            });
+        } else {
+            registrosFiltrados = registrosFiltrados.filter(r => this.calcularPeriodo(r.data) === periodo.chave);
+        }
+
+        if (registrosFiltrados.length === 0) {
             document.getElementById('valor75').textContent = '0.00';
             document.getElementById('valor100').textContent = '0.00';
             document.getElementById('totalGeral').textContent = '0.00';
             return;
         }
 
-        registrosPeriodo.forEach(registro => {
+        registrosFiltrados.forEach(registro => {
             const result = this.calcularValor(registro);
 
             total75 += result.valor75;
@@ -264,6 +309,7 @@ class GerenciadorHorasPro {
                 <td>${registro.inicio} - ${registro.fim}</td>
                 <td>R$ ${result.total.toFixed(2)} <span style="font-size:0.9em;color:#888;">${tipoExtraTexto}</span></td>
                 <td>${registro.justificativa}</td>
+                <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})" title="Excluir">🗑️</button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -273,6 +319,7 @@ class GerenciadorHorasPro {
         document.getElementById('totalGeral').textContent = totalGeral.toFixed(2);
     }
 
+    // Exportações
     exportarExcel() {
         if (!this.currentUser || this.registros.length === 0) {
             alert('Não há dados para exportar');
@@ -289,33 +336,38 @@ class GerenciadorHorasPro {
             { header: 'Justificativa', key: 'justificativa', width: 50 }
         ];
 
-        const periodo = this.getPeriodoAtual();
-
-        this.registros
-            .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
-            .forEach(registro => {
-                const result = this.calcularValor(registro);
-                worksheet.addRow({
-                    data: new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR'),
-                    horas: `${registro.inicio} - ${registro.fim}`,
-                    valor: result.total.toFixed(2),
-                    tipo: result.tipoExtra,
-                    justificativa: registro.justificativa
-                });
+        let registrosExport = this.registros;
+        if (this.filtroAtivo && this.filtroInicio && this.filtroFim) {
+            registrosExport = registrosExport.filter(r => {
+                const dataRegistro = new Date(r.data + 'T00:00:00');
+                return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
             });
+        } else {
+            const periodo = this.getPeriodoAtual();
+            registrosExport = registrosExport.filter(r => this.calcularPeriodo(r.data) === periodo.chave);
+        }
+
+        registrosExport.forEach(registro => {
+            const result = this.calcularValor(registro);
+            worksheet.addRow({
+                data: new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR'),
+                horas: `${registro.inicio} - ${registro.fim}`,
+                valor: result.total.toFixed(2),
+                tipo: result.tipoExtra,
+                justificativa: registro.justificativa
+            });
+        });
 
         worksheet.addRow({});
         worksheet.addRow({ data: 'RESUMO:', horas: '', valor: '', tipo: '', justificativa: '' });
 
         let total75 = 0;
         let total100 = 0;
-        this.registros
-            .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
-            .forEach(registro => {
-                const result = this.calcularValor(registro);
-                total75 += result.valor75;
-                total100 += result.valor100;
-            });
+        registrosExport.forEach(registro => {
+            const result = this.calcularValor(registro);
+            total75 += result.valor75;
+            total100 += result.valor100;
+        });
 
         worksheet.addRow({ data: 'Horas 75%:', horas: '', valor: total75.toFixed(2) });
         worksheet.addRow({ data: 'Horas 100%:', horas: '', valor: total100.toFixed(2) });
@@ -339,8 +391,16 @@ class GerenciadorHorasPro {
         doc.setFontSize(12);
         doc.text(`Funcionário: ${this.currentUser}`, 20, 30);
 
-        const periodo = this.getPeriodoAtual();
-        doc.text(periodo.texto.replace('📊 ', ''), 20, 40);
+        let registrosExport = this.registros;
+        if (this.filtroAtivo && this.filtroInicio && this.filtroFim) {
+            registrosExport = registrosExport.filter(r => {
+                const dataRegistro = new Date(r.data + 'T00:00:00');
+                return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
+            });
+        } else {
+            const periodo = this.getPeriodoAtual();
+            registrosExport = registrosExport.filter(r => this.calcularPeriodo(r.data) === periodo.chave);
+        }
 
         let y = 50;
         doc.text('Data', 20, y);
@@ -352,24 +412,22 @@ class GerenciadorHorasPro {
         let total75 = 0;
         let total100 = 0;
 
-        this.registros
-            .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
-            .forEach(registro => {
-                const result = this.calcularValor(registro);
-                total75 += result.valor75;
-                total100 += result.valor100;
+        registrosExport.forEach(registro => {
+            const result = this.calcularValor(registro);
+            total75 += result.valor75;
+            total100 += result.valor100;
 
-                doc.text(new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR'), 20, y);
-                doc.text(`${registro.inicio} - ${registro.fim}`, 60, y);
-                doc.text(`R$ ${result.total.toFixed(2)}`, 100, y);
-                doc.text(result.tipoExtra, 140, y);
+            doc.text(new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR'), 20, y);
+            doc.text(`${registro.inicio} - ${registro.fim}`, 60, y);
+            doc.text(`R$ ${result.total.toFixed(2)}`, 100, y);
+            doc.text(result.tipoExtra, 140, y);
 
-                y += 10;
-                if (y > 270) {
-                    doc.addPage();
-                    y = 20;
-                }
-            });
+            y += 10;
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+        });
 
         y += 10;
         doc.text('RESUMO:', 20, y);
@@ -389,29 +447,36 @@ class GerenciadorHorasPro {
             return;
         }
 
-        const periodo = this.getPeriodoAtual();
+        let registrosExport = this.registros;
+        if (this.filtroAtivo && this.filtroInicio && this.filtroFim) {
+            registrosExport = registrosExport.filter(r => {
+                const dataRegistro = new Date(r.data + 'T00:00:00');
+                return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
+            });
+        } else {
+            const periodo = this.getPeriodoAtual();
+            registrosExport = registrosExport.filter(r => this.calcularPeriodo(r.data) === periodo.chave);
+        }
 
         let total75 = 0;
         let total100 = 0;
         let registrosHTML = '';
 
-        this.registros
-            .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
-            .forEach(registro => {
-                const result = this.calcularValor(registro);
-                total75 += result.valor75;
-                total100 += result.valor100;
+        registrosExport.forEach(registro => {
+            const result = this.calcularValor(registro);
+            total75 += result.valor75;
+            total100 += result.valor100;
 
-                registrosHTML += `
-                    <tr>
-                        <td>${new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                        <td>${registro.inicio} - ${registro.fim}</td>
-                        <td>R$ ${result.total.toFixed(2)}</td>
-                        <td>${result.tipoExtra}</td>
-                        <td>${registro.justificativa}</td>
-                    </tr>
-                `;
-            });
+            registrosHTML += `
+                <tr>
+                    <td>${new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${registro.inicio} - ${registro.fim}</td>
+                    <td>R$ ${result.total.toFixed(2)}</td>
+                    <td>${result.tipoExtra}</td>
+                    <td>${registro.justificativa}</td>
+                </tr>
+            `;
+        });
 
         const content = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
@@ -435,7 +500,6 @@ class GerenciadorHorasPro {
         </head>
         <body>
             <h1>Relatório de Horas Extras - ${this.currentUser}</h1>
-            <h2>${periodo.texto.replace('📊 ', '')}</h2>
             <table>
                 <tr>
                     <th>Data</th>
@@ -464,3 +528,19 @@ window.exportarExcel = () => gerenciador.exportarExcel();
 window.exportarPDF = () => gerenciador.exportarPDF();
 window.exportarWord = () => gerenciador.exportarWord();
 window.exportarBackup = () => gerenciador.exportarBackup();
+window.aplicarFiltroPersonalizado = function() {
+    const inicio = document.getElementById('filtroInicio').value;
+    const fim = document.getElementById('filtroFim').value;
+    if (inicio && fim) {
+        gerenciador.filtrarPorPeriodoPersonalizado(new Date(inicio + 'T00:00:00'), new Date(fim + 'T00:00:00'));
+    } else {
+        alert('Preencha as duas datas para filtrar!');
+    }
+};
+window.filtrarPorMes = function() {
+    const mesAno = document.getElementById('filtroMes').value;
+    if (mesAno) gerenciador.filtrarPorMes(mesAno);
+};
+window.limparFiltros = function() {
+    gerenciador.limparFiltros();
+};
