@@ -292,3 +292,31 @@ tr:hover {
         font-size: 0.96em;
     }
 }
+.filtros {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filtros input, .filtros button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+}
+
+.btn-excluir {
+    background: none;
+    border: none;
+    color: var(--error);
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1.2em;
+    transition: transform 0.2s;
+}
+
+.btn-excluir:hover {
+    transform: scale(1.2);
+    color: #b71c1c;
+}
