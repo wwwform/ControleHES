@@ -59,6 +59,15 @@
             </div>
         </div>
 
+        <!-- FILTROS -->
+        <div class="filtros">
+            <input type="month" id="filtroMes" onchange="filtrarPorMes()">
+            <input type="date" id="filtroInicio">
+            <input type="date" id="filtroFim">
+            <button type="button" onclick="aplicarFiltroPersonalizado()">🔎 Filtrar</button>
+            <button type="button" onclick="limparFiltros()">🔄 Limpar Filtros</button>
+        </div>
+
         <table id="registros">
             <thead>
                 <tr>
@@ -66,6 +75,7 @@
                     <th>Horas</th>
                     <th>Valor</th>
                     <th>Justificativa</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody></tbody>
