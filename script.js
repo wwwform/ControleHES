@@ -31,19 +31,13 @@ class GerenciadorHorasPro {
             this.feriados = data.map(f => f.date);
             localStorage.setItem('feriadosHE', JSON.stringify(this.feriados));
         } catch (error) {
-            console.warn('Usando feriados locais:', error);
-            // Se falhar, usa feriados fixos
+            // fallback: feriados fixos se API falhar
             if (!this.feriados || this.feriados.length === 0) {
                 const anoAtual = new Date().getFullYear();
                 this.feriados = [
-                    `${anoAtual}-01-01`, // Ano Novo
-                    `${anoAtual}-04-21`, // Tiradentes
-                    `${anoAtual}-05-01`, // Dia do Trabalho
-                    `${anoAtual}-09-07`, // Independência
-                    `${anoAtual}-10-12`, // Nossa Senhora
-                    `${anoAtual}-11-02`, // Finados
-                    `${anoAtual}-11-15`, // Proclamação da República
-                    `${anoAtual}-12-25`  // Natal
+                    `${anoAtual}-01-01`, `${anoAtual}-04-21`, `${anoAtual}-05-01`,
+                    `${anoAtual}-09-07`, `${anoAtual}-10-12`, `${anoAtual}-11-02`,
+                    `${anoAtual}-11-15`, `${anoAtual}-12-25`
                 ];
                 localStorage.setItem('feriadosHE', JSON.stringify(this.feriados));
             }
@@ -82,17 +76,23 @@ class GerenciadorHorasPro {
     }
 
     carregarRegistrosUsuario() {
-        return this.currentUser ? 
+        return this.currentUser ?
             JSON.parse(localStorage.getItem(`registrosHE_${this.currentUser}`)) || [] : [];
     }
 
+    // CORREÇÃO: Salva a data corretamente, sem problemas de fuso horário
     salvarRegistro(e) {
         e.preventDefault();
         if (!this.currentUser) return alert('Faça login primeiro!');
+        const dataInput = document.getElementById('data').value;
+        const [ano, mes, dia] = dataInput.split('-');
+        // Salva a data sempre no formato yyyy-mm-dd
+        const dataCorrigida = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+
         const novoRegistro = {
             id: Date.now(),
             nome: this.currentUser,
-            data: document.getElementById('data').value,
+            data: dataCorrigida,
             inicio: document.getElementById('horaInicio').value,
             fim: document.getElementById('horaFim').value,
             justificativa: document.getElementById('justificativa').value,
@@ -108,7 +108,6 @@ class GerenciadorHorasPro {
         const hoje = new Date();
         const dia = hoje.getDate();
         const divNotificacoes = document.getElementById('notificacoes');
-        
         if (dia >= 18 && dia <= 20) {
             divNotificacoes.style.display = 'block';
             divNotificacoes.innerHTML = `⚠️ Faltam ${20 - dia} dias para o fechamento do período!`;
@@ -150,8 +149,7 @@ class GerenciadorHorasPro {
     }
 
     calcularPeriodo(data) {
-        const date = new Date(data);
-        // Ajustando para considerar o mês real (21/mês atual a 20/próximo mês)
+        const date = new Date(data + 'T00:00:00');
         if (date.getDate() >= 21) {
             const mesAtual = date.getMonth();
             const mesSeguinte = (mesAtual + 1) % 12;
@@ -166,68 +164,58 @@ class GerenciadorHorasPro {
     getPeriodoAtual() {
         const hoje = new Date();
         let mesInicio, mesFim, anoInicio, anoFim;
-        
         if (hoje.getDate() >= 21) {
-            mesInicio = hoje.getMonth() + 1; // Mês atual (1-12)
-            mesFim = (hoje.getMonth() + 2 > 12) ? (hoje.getMonth() + 2 - 12) : hoje.getMonth() + 2; // Próximo mês
+            mesInicio = hoje.getMonth() + 1;
+            mesFim = (hoje.getMonth() + 2 > 12) ? (hoje.getMonth() + 2 - 12) : hoje.getMonth() + 2;
             anoInicio = hoje.getFullYear();
             anoFim = (hoje.getMonth() + 1 === 12) ? hoje.getFullYear() + 1 : hoje.getFullYear();
         } else {
-            mesInicio = hoje.getMonth(); // Mês anterior (0-11)
-            mesFim = hoje.getMonth() + 1; // Mês atual
+            mesInicio = hoje.getMonth();
+            mesFim = hoje.getMonth() + 1;
             anoInicio = (hoje.getMonth() === 0) ? hoje.getFullYear() - 1 : hoje.getFullYear();
             anoFim = hoje.getFullYear();
         }
-        
         return {
             texto: `📊 Resumo do Período (21/${String(mesInicio).padStart(2, '0')}/${anoInicio} a 20/${String(mesFim).padStart(2, '0')}/${anoFim})`,
-            chave: `${mesInicio - 1}-${mesFim - 1}` // Ajustado para o formato interno (0-11)
+            chave: `${mesInicio - 1}-${mesFim - 1}`
         };
     }
 
-    // CORREÇÃO NA FUNÇÃO DE CÁLCULO DE VALOR
+    // CÁLCULO CORRETO DAS HORAS EXTRAS
     calcularValor(registro) {
-        // Cálculo do valor/hora (usando 220h fixo)
         const JORNADA_MENSAL = 220;
         const valorHora = registro.salarioMensal / JORNADA_MENSAL;
-        
-        // Cálculo das horas trabalhadas
+
         const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
         const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
-        
+
         let minutosTotais = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
-        if (minutosTotais < 0) minutosTotais += 1440; // Ajuste para turno noturno
-        
+        if (minutosTotais < 0) minutosTotais += 1440;
+
         const horasTotais = minutosTotais / 60;
-        
-        // Verificação de fim de semana ou feriado
-        const data = new Date(registro.data);
-        const diaSemana = data.getDay(); // 0 = domingo, 6 = sábado
+
+        // Corrige a data para não ter problema de fuso
+        const [ano, mes, dia] = registro.data.split('-').map(Number);
+        const data = new Date(ano, mes - 1, dia);
+
+        const diaSemana = data.getDay();
         const isFimSemana = diaSemana === 0 || diaSemana === 6;
         const isFeriado = this.feriados.includes(registro.data);
-        
-        // Cálculo dos valores conforme a regra:
-        // Dia de semana normal: 75% até 2h, 100% acima
-        // Fim de semana/feriado: sempre 100%
+
         let valor75 = 0;
         let valor100 = 0;
-        
+
         if (isFimSemana || isFeriado) {
-            // Fim de semana ou feriado: 100% para todas as horas
-            valor100 = horasTotais * valorHora * 2; // Dobro do valor da hora
+            valor100 = horasTotais * valorHora * 2;
         } else {
-            // Dia de semana normal: 75% até 2h, 100% acima
             if (horasTotais <= 2) {
-                // Até 2h: 75% adicional
-                valor75 = horasTotais * valorHora * 1.75; // 1.75 = valor normal + 75%
+                valor75 = horasTotais * valorHora * 1.75;
             } else {
-                // Primeiras 2h: 75% adicional
                 valor75 = 2 * valorHora * 1.75;
-                // Horas acima de 2h: 100% adicional
-                valor100 = (horasTotais - 2) * valorHora * 2; // 2 = valor normal + 100%
+                valor100 = (horasTotais - 2) * valorHora * 2;
             }
         }
-        
+
         return {
             valor75: valor75,
             valor100: valor100,
@@ -243,34 +231,29 @@ class GerenciadorHorasPro {
         let total75 = 0;
         let total100 = 0;
         let totalGeral = 0;
-        
-        // Obtém o período atual
+
         const periodo = this.getPeriodoAtual();
         document.getElementById('periodoResumo').textContent = periodo.texto;
-        
-        // Filtra registros do período atual
+
         const registrosPeriodo = this.registros.filter(r => this.calcularPeriodo(r.data) === periodo.chave);
-        
+
         if (registrosPeriodo.length === 0) {
             document.getElementById('valor75').textContent = '0.00';
             document.getElementById('valor100').textContent = '0.00';
             document.getElementById('totalGeral').textContent = '0.00';
             return;
         }
-        
-        // Processa cada registro
+
         registrosPeriodo.forEach(registro => {
             const result = this.calcularValor(registro);
-            
-            // Acumula os totais
+
             total75 += result.valor75;
             total100 += result.valor100;
             totalGeral += result.total;
-            
-            // Cria a linha da tabela
-            const dataObj = new Date(registro.data);
-            const tr = document.createElement('tr');
-            
+
+            const [ano, mes, dia] = registro.data.split('-').map(Number);
+            const dataObj = new Date(ano, mes - 1, dia);
+
             let tipoExtraTexto = '';
             if (result.tipoExtra === '100%') {
                 tipoExtraTexto = '100%';
@@ -279,18 +262,17 @@ class GerenciadorHorasPro {
             } else {
                 tipoExtraTexto = '75%/100%';
             }
-            
+
+            const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${dataObj.toLocaleDateString('pt-BR')}</td>
                 <td>${registro.inicio} - ${registro.fim}</td>
                 <td>R$ ${result.total.toFixed(2)} <span style="font-size:0.9em;color:#888;">${tipoExtraTexto}</span></td>
                 <td>${registro.justificativa}</td>
             `;
-            
             tbody.appendChild(tr);
         });
-        
-        // Atualiza o resumo
+
         document.getElementById('valor75').textContent = total75.toFixed(2);
         document.getElementById('valor100').textContent = total100.toFixed(2);
         document.getElementById('totalGeral').textContent = totalGeral.toFixed(2);
@@ -301,11 +283,9 @@ class GerenciadorHorasPro {
             alert('Não há dados para exportar');
             return;
         }
-        
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Horas Extras');
-        
-        // Cabeçalhos
         worksheet.columns = [
             { header: 'Data', key: 'data', width: 15 },
             { header: 'Horário', key: 'horas', width: 20 },
@@ -313,37 +293,27 @@ class GerenciadorHorasPro {
             { header: 'Tipo', key: 'tipo', width: 10 },
             { header: 'Justificativa', key: 'justificativa', width: 50 }
         ];
-        
-        // Período atual
+
         const periodo = this.getPeriodoAtual();
-        
-        // Filtra e adiciona os dados
+
         this.registros
             .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
             .forEach(registro => {
                 const result = this.calcularValor(registro);
                 worksheet.addRow({
-                    data: new Date(registro.data).toLocaleDateString('pt-BR'),
+                    data: new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR'),
                     horas: `${registro.inicio} - ${registro.fim}`,
                     valor: result.total.toFixed(2),
                     tipo: result.tipoExtra,
                     justificativa: registro.justificativa
                 });
             });
-        
-        // Adiciona o resumo
+
         worksheet.addRow({});
-        worksheet.addRow({
-            data: 'RESUMO:',
-            horas: '',
-            valor: '',
-            tipo: '',
-            justificativa: ''
-        });
-        
+        worksheet.addRow({ data: 'RESUMO:', horas: '', valor: '', tipo: '', justificativa: '' });
+
         let total75 = 0;
         let total100 = 0;
-        
         this.registros
             .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
             .forEach(registro => {
@@ -351,32 +321,11 @@ class GerenciadorHorasPro {
                 total75 += result.valor75;
                 total100 += result.valor100;
             });
-        
-        worksheet.addRow({
-            data: 'Horas 75%:',
-            horas: '',
-            valor: total75.toFixed(2),
-            tipo: '',
-            justificativa: ''
-        });
-        
-        worksheet.addRow({
-            data: 'Horas 100%:',
-            horas: '',
-            valor: total100.toFixed(2),
-            tipo: '',
-            justificativa: ''
-        });
-        
-        worksheet.addRow({
-            data: 'TOTAL:',
-            horas: '',
-            valor: (total75 + total100).toFixed(2),
-            tipo: '',
-            justificativa: ''
-        });
-        
-        // Exporta
+
+        worksheet.addRow({ data: 'Horas 75%:', horas: '', valor: total75.toFixed(2) });
+        worksheet.addRow({ data: 'Horas 100%:', horas: '', valor: total100.toFixed(2) });
+        worksheet.addRow({ data: 'TOTAL:', horas: '', valor: (total75 + total100).toFixed(2) });
+
         workbook.xlsx.writeBuffer().then(buffer => {
             const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
             saveAs(blob, `horas_extras_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -388,50 +337,45 @@ class GerenciadorHorasPro {
             alert('Não há dados para exportar');
             return;
         }
-        
+
         const doc = new jspdf.jsPDF();
-        
-        // Cabeçalho
         doc.setFontSize(16);
         doc.text('Relatório de Horas Extras', 20, 20);
         doc.setFontSize(12);
         doc.text(`Funcionário: ${this.currentUser}`, 20, 30);
-        
-        // Período
+
         const periodo = this.getPeriodoAtual();
         doc.text(periodo.texto.replace('📊 ', ''), 20, 40);
-        
-        // Tabela
+
         let y = 50;
         doc.text('Data', 20, y);
         doc.text('Horas', 60, y);
         doc.text('Valor (R$)', 100, y);
         doc.text('Tipo', 140, y);
         y += 10;
-        
+
         let total75 = 0;
         let total100 = 0;
-        
+
         this.registros
             .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
             .forEach(registro => {
                 const result = this.calcularValor(registro);
                 total75 += result.valor75;
                 total100 += result.valor100;
-                
-                doc.text(new Date(registro.data).toLocaleDateString('pt-BR'), 20, y);
+
+                doc.text(new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR'), 20, y);
                 doc.text(`${registro.inicio} - ${registro.fim}`, 60, y);
                 doc.text(`R$ ${result.total.toFixed(2)}`, 100, y);
                 doc.text(result.tipoExtra, 140, y);
-                
+
                 y += 10;
                 if (y > 270) {
                     doc.addPage();
                     y = 20;
                 }
             });
-        
-        // Resumo
+
         y += 10;
         doc.text('RESUMO:', 20, y);
         y += 10;
@@ -440,8 +384,7 @@ class GerenciadorHorasPro {
         doc.text(`Horas 100%: R$ ${total100.toFixed(2)}`, 20, y);
         y += 10;
         doc.text(`TOTAL: R$ ${(total75 + total100).toFixed(2)}`, 20, y);
-        
-        // Salva o PDF
+
         doc.save('relatorio-horas.pdf');
     }
 
@@ -450,24 +393,23 @@ class GerenciadorHorasPro {
             alert('Não há dados para exportar');
             return;
         }
-        
+
         const periodo = this.getPeriodoAtual();
-        
+
         let total75 = 0;
         let total100 = 0;
-        
         let registrosHTML = '';
-        
+
         this.registros
             .filter(r => this.calcularPeriodo(r.data) === periodo.chave)
             .forEach(registro => {
                 const result = this.calcularValor(registro);
                 total75 += result.valor75;
                 total100 += result.valor100;
-                
+
                 registrosHTML += `
                     <tr>
-                        <td>${new Date(registro.data).toLocaleDateString('pt-BR')}</td>
+                        <td>${new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                         <td>${registro.inicio} - ${registro.fim}</td>
                         <td>R$ ${result.total.toFixed(2)}</td>
                         <td>${result.tipoExtra}</td>
@@ -475,7 +417,7 @@ class GerenciadorHorasPro {
                     </tr>
                 `;
             });
-        
+
         const content = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
         <head>
@@ -499,7 +441,6 @@ class GerenciadorHorasPro {
         <body>
             <h1>Relatório de Horas Extras - ${this.currentUser}</h1>
             <h2>${periodo.texto.replace('📊 ', '')}</h2>
-            
             <table>
                 <tr>
                     <th>Data</th>
@@ -510,14 +451,13 @@ class GerenciadorHorasPro {
                 </tr>
                 ${registrosHTML}
             </table>
-            
             <h3>Resumo</h3>
             <p>Horas 75%: R$ ${total75.toFixed(2)}</p>
             <p>Horas 100%: R$ ${total100.toFixed(2)}</p>
             <p><strong>TOTAL: R$ ${(total75 + total100).toFixed(2)}</strong></p>
         </body></html>
         `;
-        
+
         const blob = new Blob(['\ufeff', content], {type: 'application/msword'});
         saveAs(blob, 'relatorio-horas.doc');
     }
