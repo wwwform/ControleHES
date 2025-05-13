@@ -27,14 +27,12 @@
 
         <div id="notificacoes" class="notificacao"></div>
 
-        <!-- Seção de Configuração do Salário -->
         <div class="config-salario">
             <h3>⚙️ Configuração do Salário</h3>
-            <input type="number" id="salarioAtual" step="0.01" placeholder="Salário atual (R$)">
-            <button onclick="atualizarSalario()">Atualizar Salário</button>
+            <input type="number" id="salarioAtual" step="0.01" placeholder="Salário atual (R$)" required>
+            <button onclick="gerenciador.atualizarSalario()">Atualizar Salário</button>
         </div>
 
-        <!-- Formulário de Registro -->
         <form id="registroForm">
             <input type="date" id="data" required>
             <div class="time-inputs">
@@ -47,7 +45,7 @@
 
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
-            <button type="button" onclick="exportarBackup()">Exportar Backup</button>
+            <button onclick="exportarBackup()">Exportar Backup</button>
             <input type="file" id="btnImportBackup" accept=".json" style="display:none;">
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
@@ -60,19 +58,18 @@
                 <p>Total: R$ <span id="totalGeral">0.00</span></p>
             </div>
             <div class="botoes-exportacao">
-                <button type="button" onclick="exportarExcel()">📊 Excel</button>
-                <button type="button" onclick="exportarPDF()">📄 PDF</button>
-                <button type="button" onclick="exportarWord()">📑 Word</button>
+                <button onclick="exportarExcel()">📊 Excel</button>
+                <button onclick="exportarPDF()">📄 PDF</button>
+                <button onclick="exportarWord()">📑 Word</button>
             </div>
         </div>
 
-        <!-- FILTROS -->
         <div class="filtros">
             <input type="month" id="filtroMes" onchange="filtrarPorMes()">
             <input type="date" id="filtroInicio">
             <input type="date" id="filtroFim">
-            <button type="button" onclick="aplicarFiltroPersonalizado()">🔎 Filtrar</button>
-            <button type="button" onclick="limparFiltros()">🔄 Limpar Filtros</button>
+            <button onclick="aplicarFiltroPersonalizado()">🔎 Filtrar</button>
+            <button onclick="limparFiltros()">🔄 Limpar Filtros</button>
         </div>
 
         <table id="registros">
