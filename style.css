@@ -16,19 +16,15 @@ body {
     padding: 20px;
 }
 
+/* Login */
 .login-container {
     max-width: 400px;
     margin: 100px auto;
-    padding: 30px 30px 20px 30px;
+    padding: 30px;
     background: var(--bg-box);
     border-radius: var(--border-radius);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.13);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     text-align: center;
-}
-
-.login-container h2 {
-    margin-bottom: 18px;
-    color: var(--primary);
 }
 
 .login-container input {
@@ -38,19 +34,16 @@ body {
     border: 2px solid #ddd;
     border-radius: 8px;
     font-size: 16px;
-    box-sizing: border-box;
 }
 
 .login-container button {
     width: 100%;
     padding: 12px;
     background: var(--secondary);
-    color: #fff;
+    color: white;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
     cursor: pointer;
-    margin-top: 10px;
     transition: background 0.3s;
 }
 
@@ -58,13 +51,14 @@ body {
     background: var(--hover);
 }
 
+/* Container Principal */
 .container {
     max-width: 1200px;
     margin: 20px auto;
     background: var(--bg-box);
     padding: 30px;
     border-radius: var(--border-radius);
-    box-shadow: 0 5px 25px rgba(0,0,0,0.09);
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
 }
 
 .header {
@@ -74,49 +68,46 @@ body {
     margin-bottom: 30px;
 }
 
-.header h1 {
-    color: var(--primary);
-    margin: 0;
-    font-size: 2rem;
-}
-
-#userGreeting {
-    font-weight: bold;
-    color: var(--secondary);
-    margin-right: 15px;
-}
-
 .logout-btn {
     background: var(--error);
     padding: 8px 16px;
-    font-size: 1em;
+    color: white;
     border: none;
     border-radius: 8px;
-    color: #fff;
     cursor: pointer;
-    margin-left: 5px;
-    transition: background 0.3s;
 }
 
-.logout-btn:hover {
-    background: #c0392b;
-}
-
-.notificacao {
-    padding: 15px;
-    margin: 20px 0 10px 0;
-    background: #fff3cd;
+/* Configuração do Salário */
+.config-salario {
+    background: #e3f2fd;
+    padding: 20px;
     border-radius: 8px;
-    color: #856404;
-    font-weight: 500;
+    margin: 20px 0;
 }
 
+.config-salario input {
+    margin-right: 10px;
+    padding: 8px;
+    width: 200px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.config-salario button {
+    padding: 8px 16px;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Formulário */
 #registroForm {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
     margin-bottom: 30px;
-    align-items: end;
 }
 
 .time-inputs {
@@ -130,122 +121,33 @@ body {
     border: 2px solid #ddd;
     border-radius: 8px;
     font-size: 16px;
-    box-sizing: border-box;
-    width: 100%;
-    resize: none;
-}
-
-#registroForm textarea {
-    min-height: 40px;
-    max-height: 120px;
 }
 
 #registroForm button {
     grid-column: span 2;
     background: var(--secondary);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 14px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-#registroForm button:hover {
-    background: var(--hover);
-}
-
-#backupSection {
-    margin: 20px 0 30px 0;
-    padding: 15px;
-    background: #e3f2fd;
-    border-radius: 8px;
-}
-
-#backupSection h3 {
-    margin-top: 0;
-    color: var(--primary);
-}
-
-.file-label {
-    display: inline-block;
-    padding: 10px 15px;
-    background: var(--secondary);
     color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-left: 10px;
-    transition: background 0.3s;
-}
-
-.file-label:hover {
-    background: var(--hover);
-}
-
-.resumo {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-    box-shadow: 0 1px 5px rgba(44,62,80,0.06);
-}
-
-.resumo h2 {
-    margin-top: 0;
-    color: var(--primary);
-    font-size: 1.2em;
-}
-
-#valores {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
-    font-size: 1.15em;
-    font-weight: bold;
-}
-
-#valores p {
-    margin: 0 10px;
-}
-
-.botoes-exportacao {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 10px;
-}
-
-.botoes-exportacao button {
-    background: var(--secondary);
-    color: #fff;
     border: none;
+    padding: 14px;
     border-radius: 8px;
-    padding: 10px 16px;
-    font-size: 1em;
     cursor: pointer;
-    transition: background 0.3s;
 }
 
-.botoes-exportacao button:hover {
-    background: var(--hover);
-}
-
+/* Tabela */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    background: #fff;
+    background: white;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 5px rgba(44,62,80,0.06);
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
 }
 
 th, td {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
-    font-size: 1em;
 }
 
 th {
@@ -254,87 +156,29 @@ th {
     font-weight: 600;
 }
 
-tr:last-child td {
-    border-bottom: none;
-}
-
-tr:hover {
-    background-color: #f5f5f5;
-}
-
-@media (max-width: 900px) {
-    .container {
-        padding: 10px;
-    }
-    #registroForm {
-        grid-template-columns: 1fr;
-    }
-    #registroForm button {
-        grid-column: span 1;
-    }
-    #valores {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-}
-
-@media (max-width: 600px) {
-    .container {
-        padding: 5px;
-    }
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    table, th, td {
-        font-size: 0.96em;
-    }
-}
-.filtros {
-    margin: 20px 0;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.filtros input, .filtros button {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-}
-
 .btn-excluir {
     background: none;
     border: none;
     color: var(--error);
     cursor: pointer;
-    padding: 5px;
     font-size: 1.2em;
-    transition: transform 0.2s;
 }
 
-.btn-excluir:hover {
-    transform: scale(1.2);
-    color: #b71c1c;
-}
-/* Novos estilos adicionados */
-.config-salario {
-    background: #e3f2fd;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 20px 0;
-}
+/* Responsivo */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
 
-.config-salario h3 {
-    margin-top: 0;
-    color: var(--primary);
-}
+    #registroForm {
+        grid-template-columns: 1fr;
+    }
 
-.config-salario input {
-    margin-right: 10px;
-    padding: 8px;
-    width: 200px;
+    #registroForm button {
+        grid-column: span 1;
+    }
+
+    .filtros {
+        flex-direction: column;
+    }
 }
