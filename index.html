@@ -10,12 +10,14 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 </head>
 <body>
+    <!-- Login -->
     <div id="loginContainer" class="login-container">
         <h2>🔒 Login</h2>
         <input type="text" id="loginUsername" placeholder="Seu nome" required>
         <button id="btnLogin">Entrar</button>
     </div>
 
+    <!-- Conteúdo Principal -->
     <div id="mainContent" class="container" style="display:none;">
         <div class="header">
             <h1>🕒 Controle de Horas Extras Pro</h1>
@@ -25,14 +27,17 @@
             </div>
         </div>
 
+        <!-- Notificações -->
         <div id="notificacoes" class="notificacao"></div>
 
+        <!-- Configuração do Salário -->
         <div class="config-salario">
             <h3>⚙️ Configuração do Salário</h3>
             <input type="number" id="salarioAtual" step="0.01" placeholder="Salário atual (R$)" required>
-            <button type="button" id="btnAtualizarSalario">Atualizar Salário</button>
+            <button id="btnAtualizarSalario">Atualizar Salário</button>
         </div>
 
+        <!-- Formulário de Registro -->
         <form id="registroForm">
             <input type="date" id="data" required>
             <div class="time-inputs">
@@ -43,13 +48,15 @@
             <button type="submit">💾 Salvar Registro</button>
         </form>
 
+        <!-- Backup -->
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
-            <button type="button" onclick="exportarBackup()">Exportar Backup</button>
+            <button onclick="exportarBackup()">Exportar Backup</button>
             <input type="file" id="btnImportBackup" accept=".json" style="display:none;">
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
 
+        <!-- Resumo e Exportação -->
         <div class="resumo">
             <h2 id="periodoResumo"></h2>
             <div id="valores">
@@ -58,20 +65,22 @@
                 <p>Total: R$ <span id="totalGeral">0.00</span></p>
             </div>
             <div class="botoes-exportacao">
-                <button type="button" onclick="exportarExcel()">📊 Excel</button>
-                <button type="button" onclick="exportarPDF()">📄 PDF</button>
-                <button type="button" onclick="exportarWord()">📑 Word</button>
+                <button onclick="exportarExcel()">📊 Excel</button>
+                <button onclick="exportarPDF()">📄 PDF</button>
+                <button onclick="exportarWord()">📑 Word</button>
             </div>
         </div>
 
+        <!-- Filtros -->
         <div class="filtros">
-            <input type="month" id="filtroMes">
-            <input type="date" id="filtroInicio">
-            <input type="date" id="filtroFim">
-            <button type="button" onclick="aplicarFiltroPersonalizado()">Filtrar</button>
-            <button type="button" onclick="limparFiltros()">Limpar Filtros</button>
+            <input type="month" id="filtroMes" placeholder="Filtrar por mês">
+            <input type="date" id="filtroInicio" placeholder="Data inicial">
+            <input type="date" id="filtroFim" placeholder="Data final">
+            <button onclick="aplicarFiltroPersonalizado()">🔎 Filtrar</button>
+            <button onclick="limparFiltros()">🔄 Limpar Filtros</button>
         </div>
 
+        <!-- Tabela de Registros -->
         <table id="registros">
             <thead>
                 <tr>
