@@ -12,7 +12,7 @@
 <body>
     <div id="loginContainer" class="login-container">
         <h2>🔒 Login</h2>
-        <input type="text" id="loginUsername" placeholder="Seu nome">
+        <input type="text" id="loginUsername" placeholder="Seu nome" required>
         <button id="btnLogin">Entrar</button>
     </div>
 
@@ -27,6 +27,14 @@
 
         <div id="notificacoes" class="notificacao"></div>
 
+        <!-- Seção de Configuração do Salário -->
+        <div class="config-salario">
+            <h3>⚙️ Configuração do Salário</h3>
+            <input type="number" id="salarioAtual" step="0.01" placeholder="Salário atual (R$)">
+            <button onclick="atualizarSalario()">Atualizar Salário</button>
+        </div>
+
+        <!-- Formulário de Registro -->
         <form id="registroForm">
             <input type="date" id="data" required>
             <div class="time-inputs">
@@ -34,7 +42,6 @@
                 <input type="time" id="horaFim" required>
             </div>
             <textarea id="justificativa" placeholder="Justificativa" required></textarea>
-            <input type="number" id="salarioMensal" step="0.01" placeholder="Salário mensal (R$)" required>
             <button type="submit">💾 Salvar Registro</button>
         </form>
 
