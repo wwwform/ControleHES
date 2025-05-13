@@ -30,7 +30,7 @@
         <div class="config-salario">
             <h3>⚙️ Configuração do Salário</h3>
             <input type="number" id="salarioAtual" step="0.01" placeholder="Salário atual (R$)" required>
-            <button onclick="gerenciador.atualizarSalario()">Atualizar Salário</button>
+            <button type="button" id="btnAtualizarSalario">Atualizar Salário</button>
         </div>
 
         <form id="registroForm">
@@ -45,7 +45,7 @@
 
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
-            <button onclick="exportarBackup()">Exportar Backup</button>
+            <button type="button" onclick="exportarBackup()">Exportar Backup</button>
             <input type="file" id="btnImportBackup" accept=".json" style="display:none;">
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
@@ -58,18 +58,18 @@
                 <p>Total: R$ <span id="totalGeral">0.00</span></p>
             </div>
             <div class="botoes-exportacao">
-                <button onclick="exportarExcel()">📊 Excel</button>
-                <button onclick="exportarPDF()">📄 PDF</button>
-                <button onclick="exportarWord()">📑 Word</button>
+                <button type="button" onclick="exportarExcel()">📊 Excel</button>
+                <button type="button" onclick="exportarPDF()">📄 PDF</button>
+                <button type="button" onclick="exportarWord()">📑 Word</button>
             </div>
         </div>
 
         <div class="filtros">
-            <input type="month" id="filtroMes" onchange="filtrarPorMes()">
+            <input type="month" id="filtroMes">
             <input type="date" id="filtroInicio">
             <input type="date" id="filtroFim">
-            <button onclick="aplicarFiltroPersonalizado()">🔎 Filtrar</button>
-            <button onclick="limparFiltros()">🔄 Limpar Filtros</button>
+            <button type="button" onclick="aplicarFiltroPersonalizado()">Filtrar</button>
+            <button type="button" onclick="limparFiltros()">Limpar Filtros</button>
         </div>
 
         <table id="registros">
