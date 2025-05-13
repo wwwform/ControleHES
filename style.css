@@ -379,3 +379,65 @@ tr:hover {
 #btnLogin:hover {
     background: var(--hover);
 }
+.feriados-personalizados {
+    background: #f7f9fb;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    border: 1px solid #e0e5ec;
+}
+.feriados-personalizados h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.05em;
+    color: var(--primary);
+    font-weight: 600;
+}
+.feriados-personalizados input[type="date"] {
+    padding: 8px 10px;
+    border: 1.5px solid #ccd;
+    border-radius: 8px;
+    font-size: 1em;
+    margin-right: 8px;
+}
+.feriados-personalizados button {
+    background: var(--secondary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.feriados-personalizados button:hover {
+    background: var(--hover);
+}
+.feriados-personalizados ul {
+    margin: 10px 0 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.feriados-personalizados li {
+    background: #e3f2fd;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.97em;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.feriados-personalizados .remove-feriado {
+    color: var(--error);
+    cursor: pointer;
+    font-size: 1.1em;
+    border: none;
+    background: none;
+    margin-left: 2px;
+}
+.feriados-personalizados .remove-feriado:hover {
+    color: #b71c1c;
+}
