@@ -326,3 +326,56 @@ tr:hover {
         gap: 4px;
     }
 }
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px 30px 20px 30px;
+    background: var(--bg-box);
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.13);
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 18px;
+    color: var(--primary);
+    font-size: 1.5em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.login-form-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 12px;
+}
+
+#loginUsername {
+    flex: 1 1 0;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    min-width: 0;
+}
+
+#btnLogin {
+    padding: 12px 20px;
+    background: var(--secondary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-weight: 500;
+}
+
+#btnLogin:hover {
+    background: var(--hover);
+}
