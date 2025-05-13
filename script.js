@@ -22,6 +22,7 @@ class GerenciadorHoras {
             this.carregarRegistrosUsuario();
             this.ocultarLogin();
             this.carregarSalarioUsuario();
+            this.renderizarFeriadosPersonalizados();
             this.renderizarTabela();
         }
     }
@@ -32,6 +33,7 @@ class GerenciadorHoras {
         document.getElementById('registroForm').addEventListener('submit', (e) => this.salvarRegistro(e));
         document.getElementById('btnImportBackup').addEventListener('change', (e) => this.importarBackup(e));
         document.getElementById('btnAtualizarSalario').addEventListener('click', () => this.atualizarSalario());
+        document.getElementById('btnAddFeriado').addEventListener('click', () => this.adicionarFeriadoPersonalizado());
     }
 
     async carregarFeriadosAPI() {
@@ -51,6 +53,7 @@ class GerenciadorHoras {
             this.carregarRegistrosUsuario();
             this.ocultarLogin();
             this.carregarSalarioUsuario();
+            this.renderizarFeriadosPersonalizados();
             this.renderizarTabela();
         }
     }
@@ -97,6 +100,42 @@ class GerenciadorHoras {
         }
     }
 
+    // Feriados personalizados
+    getFeriadosPersonalizados() {
+        return JSON.parse(localStorage.getItem('feriadosPers_' + this.currentUser)) || [];
+    }
+    adicionarFeriadoPersonalizado() {
+        const input = document.getElementById('novoFeriado');
+        const data = input.value;
+        if (!data) return;
+        let feriadosPers = this.getFeriadosPersonalizados();
+        if (!feriadosPers.includes(data)) {
+            feriadosPers.push(data);
+            localStorage.setItem('feriadosPers_' + this.currentUser, JSON.stringify(feriadosPers));
+            this.renderizarFeriadosPersonalizados();
+            this.renderizarTabela();
+        }
+        input.value = '';
+    }
+    removerFeriadoPersonalizado(data) {
+        let feriadosPers = this.getFeriadosPersonalizados();
+        feriadosPers = feriadosPers.filter(f => f !== data);
+        localStorage.setItem('feriadosPers_' + this.currentUser, JSON.stringify(feriadosPers));
+        this.renderizarFeriadosPersonalizados();
+        this.renderizarTabela();
+    }
+    renderizarFeriadosPersonalizados() {
+        const ul = document.getElementById('listaFeriadosPersonalizados');
+        if (!ul) return;
+        ul.innerHTML = '';
+        const feriados = this.getFeriadosPersonalizados();
+        feriados.forEach(data => {
+            const li = document.createElement('li');
+            li.innerHTML = `${data} <button class="remove-feriado" onclick="gerenciador.removerFeriadoPersonalizado('${data}')">&times;</button>`;
+            ul.appendChild(li);
+        });
+    }
+
     salvarRegistro(e) {
         e.preventDefault();
         const salario = parseFloat(localStorage.getItem(`salarioHE_${this.currentUser}`));
@@ -104,7 +143,6 @@ class GerenciadorHoras {
             alert('Configure o salário primeiro!');
             return;
         }
-
         const novoRegistro = {
             id: Date.now(),
             nome: this.currentUser,
@@ -114,7 +152,6 @@ class GerenciadorHoras {
             justificativa: document.getElementById('justificativa').value,
             salarioMensal: salario
         };
-
         this.registros.push(novoRegistro);
         this.salvarRegistrosUsuario();
         this.renderizarTabela();
@@ -131,9 +168,11 @@ class GerenciadorHoras {
         const data = new Date(registro.data + 'T00:00:00');
         const isFimSemana = [0, 6].includes(data.getDay());
         const isFeriado = this.feriados.includes(registro.data);
+        const feriadosPersonalizados = this.getFeriadosPersonalizados();
+        const isFeriadoPersonalizado = feriadosPersonalizados.includes(registro.data);
         let valor75 = 0, valor100 = 0;
 
-        if (isFimSemana || isFeriado) {
+        if (isFimSemana || isFeriado || isFeriadoPersonalizado) {
             valor100 = horas * valorHora * 2;
         } else {
             const normal = Math.min(horas, 2);
@@ -146,7 +185,7 @@ class GerenciadorHoras {
             total: valor75 + valor100,
             valor75,
             valor100,
-            tipo: (isFimSemana || isFeriado) ? '100%' : (horas <= 2 ? '75%' : '75%/100%')
+            tipo: (isFimSemana || isFeriado || isFeriadoPersonalizado) ? '100%' : (horas <= 2 ? '75%' : '75%/100%')
         };
     }
 
