@@ -135,6 +135,10 @@ class GerenciadorHoras {
             ul.appendChild(li);
         });
     }
+    getFeriadosPersonalizados() {
+    return JSON.parse(localStorage.getItem('feriadosPers_' + this.currentUser)) || [];
+    }
+
 
     salvarRegistro(e) {
         e.preventDefault();
@@ -159,35 +163,37 @@ class GerenciadorHoras {
     }
 
     calcularValor(registro) {
-        const valorHora = registro.salarioMensal / 220;
-        const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
-        const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
-        let minutos = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
-        if (minutos < 0) minutos += 1440;
-        const horas = minutos / 60;
-        const data = new Date(registro.data + 'T00:00:00');
-        const isFimSemana = [0, 6].includes(data.getDay());
-        const isFeriado = this.feriados.includes(registro.data);
-        const feriadosPersonalizados = this.getFeriadosPersonalizados();
-        const isFeriadoPersonalizado = feriadosPersonalizados.includes(registro.data);
-        let valor75 = 0, valor100 = 0;
+    const valorHora = registro.salarioMensal / 220;
+    const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
+    const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
+    let minutos = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
+    if (minutos < 0) minutos += 1440;
+    const horas = minutos / 60;
+    const data = new Date(registro.data + 'T00:00:00');
+    const isFimSemana = [0, 6].includes(data.getDay());
+    const isFeriado = this.feriados.includes(registro.data);
 
-        if (isFimSemana || isFeriado || isFeriadoPersonalizado) {
-            valor100 = horas * valorHora * 2;
-        } else {
-            const normal = Math.min(horas, 2);
-            const extra = Math.max(horas - 2, 0);
-            valor75 = normal * valorHora * 1.75;
-            valor100 = extra * valorHora * 2;
-        }
+    // NOVO: Verifica feriado personalizado
+    const feriadosPersonalizados = this.getFeriadosPersonalizados();
+    const isFeriadoPersonalizado = feriadosPersonalizados.includes(registro.data);
 
-        return {
-            total: valor75 + valor100,
-            valor75,
-            valor100,
-            tipo: (isFimSemana || isFeriado || isFeriadoPersonalizado) ? '100%' : (horas <= 2 ? '75%' : '75%/100%')
-        };
+    let valor75 = 0, valor100 = 0;
+    if (isFimSemana || isFeriado || isFeriadoPersonalizado) {
+        valor100 = horas * valorHora * 2;
+    } else {
+        const normal = Math.min(horas, 2);
+        const extra = Math.max(horas - 2, 0);
+        valor75 = normal * valorHora * 1.75;
+        valor100 = extra * valorHora * 2;
     }
+    return {
+        total: valor75 + valor100,
+        valor75,
+        valor100,
+        tipo: (isFimSemana || isFeriado || isFeriadoPersonalizado) ? '100%' : (horas <= 2 ? '75%' : '75%/100%')
+    };
+}
+
 
     renderizarTabela() {
         const tbody = document.querySelector('#registros tbody');
