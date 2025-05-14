@@ -19,7 +19,7 @@ class GerenciadorHoras {
 
     initGoogle() {
         google.accounts.id.initialize({
-            client_id: '845191547210-0bs3opp2qdrqsocc3c2k373p84b4a8n8.apps.googleusercontent.com', // Substitua pelo seu Client ID
+            client_id: '845191547210-0bs3opp2qdrqsocc3c2k373p84b4a8n8.apps.googleusercontent.com',
             callback: (response) => this.handleGoogleLogin(response)
         });
         google.accounts.id.renderButton(
@@ -39,35 +39,87 @@ class GerenciadorHoras {
     }
 
     configurarEventos() {
+        // Eventos de login
         document.getElementById('btnLogin').addEventListener('click', () => this.realizarLogin());
         document.getElementById('btnLogout').addEventListener('click', () => this.realizarLogout());
+        document.getElementById('btnCadastrar').addEventListener('click', () => this.mostrarRegistro());
+        document.getElementById('btnVoltarLogin').addEventListener('click', () => this.mostrarLogin());
+        document.getElementById('formRegistro').addEventListener('submit', (e) => this.registrarUsuario(e));
+        
+        // Eventos principais
         document.getElementById('registroForm').addEventListener('submit', (e) => this.salvarRegistro(e));
         document.getElementById('btnImportBackup').addEventListener('change', (e) => this.importarBackup(e));
-        document.getElementById('btnAtualizarSalario').addEventListener('click', () => this.atualizarSalario());
         document.getElementById('btnAddFeriado').addEventListener('click', () => this.adicionarFeriadoPersonalizado());
+        
+        // Eventos de edição de salário
         document.getElementById('btnEditarSalario').addEventListener('click', () => {
-        document.getElementById('formSalario').style.display = 'block';
-        document.getElementById('btnEditarSalario').style.display = 'none';
-        const salarioAtual = localStorage.getItem(`salarioHE_${this.currentUser}`);
-        document.getElementById('novoSalario').value = salarioAtual ? salarioAtual : '';
-    });
+            document.getElementById('formSalario').style.display = 'block';
+            document.getElementById('btnEditarSalario').style.display = 'none';
+            const salarioAtual = localStorage.getItem(`salarioHE_${this.currentUser}`);
+            document.getElementById('novoSalario').value = salarioAtual || '';
+        });
+        
         document.getElementById('btnCancelarSalario').addEventListener('click', () => {
-        document.getElementById('formSalario').style.display = 'none';
-        document.getElementById('btnEditarSalario').style.display = 'inline-block';
-    });
-        document.getElementById('formSalario').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const novoSalario = parseFloat(document.getElementById('novoSalario').value);
-        if (!isNaN(novoSalario) && novoSalario > 0) {
-            localStorage.setItem(`salarioHE_${this.currentUser}`, novoSalario);
-            alert('Salário atualizado! Os novos lançamentos usarão o novo valor.');
             document.getElementById('formSalario').style.display = 'none';
             document.getElementById('btnEditarSalario').style.display = 'inline-block';
-        } else {
-            alert('Digite um valor válido!');
+        });
+        
+        document.getElementById('formSalario').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const novoSalario = parseFloat(document.getElementById('novoSalario').value);
+            if (!isNaN(novoSalario) && novoSalario > 0) {
+                localStorage.setItem(`salarioHE_${this.currentUser}`, novoSalario);
+                alert('Salário atualizado! Os novos lançamentos usarão o novo valor.');
+                document.getElementById('formSalario').style.display = 'none';
+                document.getElementById('btnEditarSalario').style.display = 'inline-block';
+            } else {
+                alert('Digite um valor válido!');
+            }
+        });
+    }
+
+    mostrarRegistro() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registroContainer').style.display = 'block';
+    }
+
+    mostrarLogin() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registroContainer').style.display = 'none';
+    }
+
+    registrarUsuario(e) {
+        e.preventDefault();
+        const email = document.getElementById('regEmail').value;
+        const senha = document.getElementById('regSenha').value;
+        const confirmSenha = document.getElementById('regConfirmSenha').value;
+        
+        if (senha !== confirmSenha) {
+            alert('As senhas não coincidem!');
+            return;
         }
-    });
-}
+        
+        const usuarios = JSON.parse(localStorage.getItem('usuariosHE')) || {};
+        
+        if (usuarios[email]) {
+            alert('Este e-mail já está cadastrado!');
+            return;
+        }
+        
+        usuarios[email] = {
+            senha: btoa(senha) // Codificação simples (não segura para produção)
+        };
+        
+        localStorage.setItem('usuariosHE', JSON.stringify(usuarios));
+        alert('Cadastro realizado com sucesso!');
+        
+        // Auto-login após registro
+        this.currentUser = email;
+        localStorage.setItem('currentUserHE', JSON.stringify(email));
+        this.ocultarLogin();
+        this.carregarRegistrosUsuario();
+        this.renderizarTabela();
+    }
 
     async carregarFeriadosAPI() {
         try {
@@ -87,15 +139,25 @@ class GerenciadorHoras {
             return;
         }
 
-        const usuarioSalvo = localStorage.getItem('credenciaisHE_' + username);
-        if (usuarioSalvo) {
-            const { senha: hashSalvo } = JSON.parse(usuarioSalvo);
-            if (btoa(senha) !== hashSalvo) {
-                alert('Senha incorreta!');
+        // Verifica se é um login por email
+        if (username.includes('@')) {
+            const usuarios = JSON.parse(localStorage.getItem('usuariosHE')) || {};
+            if (!usuarios[username] || usuarios[username].senha !== btoa(senha)) {
+                alert('E-mail ou senha incorretos!');
                 return;
             }
         } else {
-            localStorage.setItem('credenciaisHE_' + username, JSON.stringify({ senha: btoa(senha) }));
+            // Login legado por nome de usuário
+            const usuarioSalvo = localStorage.getItem('credenciaisHE_' + username);
+            if (usuarioSalvo) {
+                const { senha: hashSalvo } = JSON.parse(usuarioSalvo);
+                if (btoa(senha) !== hashSalvo) {
+                    alert('Senha incorreta!');
+                    return;
+                }
+            } else {
+                localStorage.setItem('credenciaisHE_' + username, JSON.stringify({ senha: btoa(senha) }));
+            }
         }
 
         this.currentUser = username;
@@ -136,17 +198,8 @@ class GerenciadorHoras {
 
     carregarSalarioUsuario() {
         const salario = localStorage.getItem(`salarioHE_${this.currentUser}`);
-        document.getElementById('salarioAtual').value = salario || '';
-    }
-
-    atualizarSalario() {
-        const salario = parseFloat(document.getElementById('salarioAtual').value);
-        if (!isNaN(salario)) {
-            localStorage.setItem(`salarioHE_${this.currentUser}`, salario);
-            alert('Salário atualizado!');
-            this.renderizarTabela();
-        } else {
-            alert('Digite um valor válido!');
+        if (salario) {
+            document.getElementById('novoSalario').value = salario;
         }
     }
 
@@ -325,7 +378,10 @@ class GerenciadorHoras {
     }
 
     renderizarGrafico() {
-        const ctx = document.getElementById('graficoHoras').getContext('2d');
+        const ctx = document.getElementById('graficoHoras');
+        if (!ctx) return;
+        
+        const context = ctx.getContext('2d');
         if (this.grafico) this.grafico.destroy();
 
         const periodos = {};
@@ -342,7 +398,7 @@ class GerenciadorHoras {
         const dados100 = labels.map(mes => periodos[mes].valor100);
         const dadosTotal = labels.map(mes => periodos[mes].valor75 + periodos[mes].valor100);
 
-        this.grafico = new Chart(ctx, {
+        this.grafico = new Chart(context, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -502,18 +558,23 @@ class GerenciadorHoras {
     }
 }
 
-window.gerenciador = new GerenciadorHoras();
-window.exportarExcel = () => gerenciador.exportarExcel();
-window.exportarPDF = () => gerenciador.exportarPDF();
-window.exportarWord = () => gerenciador.exportarWord();
-window.exportarBackup = () => gerenciador.exportarBackup();
-window.aplicarFiltroPersonalizado = () => gerenciador.aplicarFiltroPersonalizado();
-window.filtrarPorMes = () => gerenciador.filtrarPorMes();
-window.limparFiltros = () => gerenciador.limparFiltros();
-// Garante que o Google está carregado
-const checkGoogle = setInterval(() => {
+document.addEventListener('DOMContentLoaded', function() {
+    window.gerenciador = new GerenciadorHoras();
+    
+    // Funções auxiliares globais
+    window.exportarExcel = () => gerenciador.exportarExcel();
+    window.exportarPDF = () => gerenciador.exportarPDF();
+    window.exportarWord = () => gerenciador.exportarWord();
+    window.exportarBackup = () => gerenciador.exportarBackup();
+    window.aplicarFiltroPersonalizado = () => gerenciador.aplicarFiltroPersonalizado();
+    window.filtrarPorMes = () => gerenciador.filtrarPorMes();
+    window.limparFiltros = () => gerenciador.limparFiltros();
+    
+    // Inicializa Google Login assim que disponível
+    const checkGoogle = setInterval(() => {
         if (window.google && google.accounts && google.accounts.id) {
-            window.gerenciador.initGoogle();
+            gerenciador.initGoogle();
             clearInterval(checkGoogle);
         }
     }, 100);
+});
