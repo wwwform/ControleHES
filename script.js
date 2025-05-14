@@ -6,6 +6,7 @@ class GerenciadorHoras {
         this.filtroAtivo = false;
         this.filtroInicio = null;
         this.filtroFim = null;
+        this.grafico = null;
         this.init();
     }
 
@@ -13,18 +14,28 @@ class GerenciadorHoras {
         await this.carregarFeriadosAPI();
         this.configurarEventos();
         this.verificarLogin();
+        window.initGoogle = () => this.initGoogle();
     }
 
-    verificarLogin() {
-        const user = localStorage.getItem('currentUserHE');
-        if (user) {
-            this.currentUser = JSON.parse(user);
-            this.carregarRegistrosUsuario();
-            this.ocultarLogin();
-            this.carregarSalarioUsuario();
-            this.renderizarFeriadosPersonalizados();
-            this.renderizarTabela();
-        }
+    initGoogle() {
+        google.accounts.id.initialize({
+            client_id: 'SEU_CLIENT_ID.apps.googleusercontent.com',
+            callback: (response) => this.handleGoogleLogin(response)
+        });
+        google.accounts.id.renderButton(
+            document.getElementById('btnGoogleLogin'),
+            { theme: 'filled_blue', size: 'medium' }
+        );
+    }
+
+    handleGoogleLogin(response) {
+        const { credential } = response;
+        const payload = JSON.parse(atob(credential.split('.')[1]));
+        this.currentUser = payload.email;
+        localStorage.setItem('currentUserHE', JSON.stringify(this.currentUser));
+        this.ocultarLogin();
+        this.carregarRegistrosUsuario();
+        this.renderizarTabela();
     }
 
     configurarEventos() {
@@ -47,15 +58,33 @@ class GerenciadorHoras {
 
     realizarLogin() {
         const username = document.getElementById('loginUsername').value.trim();
-        if (username) {
-            this.currentUser = username;
-            localStorage.setItem('currentUserHE', JSON.stringify(username));
-            this.carregarRegistrosUsuario();
-            this.ocultarLogin();
-            this.carregarSalarioUsuario();
-            this.renderizarFeriadosPersonalizados();
-            this.renderizarTabela();
+        const senha = document.getElementById('loginSenha').value;
+
+        if (!username || !senha) {
+            alert('Preencha todos os campos!');
+            return;
         }
+
+        const usuarioSalvo = localStorage.getItem('credenciaisHE_' + username);
+        if (usuarioSalvo) {
+            const { senha: hashSalvo } = JSON.parse(usuarioSalvo);
+            if (btoa(senha) !== hashSalvo) {
+                alert('Senha incorreta!');
+                return;
+            }
+        } else {
+            localStorage.setItem('credenciaisHE_' + username, JSON.stringify({
+                senha: btoa(senha)
+            }));
+        }
+
+        this.currentUser = username;
+        localStorage.setItem('currentUserHE', JSON.stringify(username));
+        this.carregarRegistrosUsuario();
+        this.ocultarLogin();
+        this.carregarSalarioUsuario();
+        this.renderizarFeriadosPersonalizados();
+        this.renderizarTabela();
     }
 
     realizarLogout() {
@@ -95,19 +124,21 @@ class GerenciadorHoras {
         if (!isNaN(salario)) {
             localStorage.setItem(`salarioHE_${this.currentUser}`, salario);
             alert('Salário atualizado!');
+            this.renderizarTabela();
         } else {
             alert('Digite um valor válido!');
         }
     }
 
-    // Feriados personalizados
     getFeriadosPersonalizados() {
         return JSON.parse(localStorage.getItem('feriadosPers_' + this.currentUser)) || [];
     }
+
     adicionarFeriadoPersonalizado() {
         const input = document.getElementById('novoFeriado');
         const data = input.value;
         if (!data) return;
+
         let feriadosPers = this.getFeriadosPersonalizados();
         if (!feriadosPers.includes(data)) {
             feriadosPers.push(data);
@@ -117,6 +148,7 @@ class GerenciadorHoras {
         }
         input.value = '';
     }
+
     removerFeriadoPersonalizado(data) {
         let feriadosPers = this.getFeriadosPersonalizados();
         feriadosPers = feriadosPers.filter(f => f !== data);
@@ -124,9 +156,9 @@ class GerenciadorHoras {
         this.renderizarFeriadosPersonalizados();
         this.renderizarTabela();
     }
+
     renderizarFeriadosPersonalizados() {
         const ul = document.getElementById('listaFeriadosPersonalizados');
-        if (!ul) return;
         ul.innerHTML = '';
         const feriados = this.getFeriadosPersonalizados();
         feriados.forEach(data => {
@@ -135,10 +167,6 @@ class GerenciadorHoras {
             ul.appendChild(li);
         });
     }
-    getFeriadosPersonalizados() {
-    return JSON.parse(localStorage.getItem('feriadosPers_' + this.currentUser)) || [];
-    }
-
 
     salvarRegistro(e) {
         e.preventDefault();
@@ -147,6 +175,7 @@ class GerenciadorHoras {
             alert('Configure o salário primeiro!');
             return;
         }
+
         const novoRegistro = {
             id: Date.now(),
             nome: this.currentUser,
@@ -156,6 +185,7 @@ class GerenciadorHoras {
             justificativa: document.getElementById('justificativa').value,
             salarioMensal: salario
         };
+
         this.registros.push(novoRegistro);
         this.salvarRegistrosUsuario();
         this.renderizarTabela();
@@ -163,43 +193,44 @@ class GerenciadorHoras {
     }
 
     calcularValor(registro) {
-    const valorHora = registro.salarioMensal / 220;
-    const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
-    const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
-    let minutos = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
-    if (minutos < 0) minutos += 1440;
-    const horas = minutos / 60;
-    const data = new Date(registro.data + 'T00:00:00');
-    const isFimSemana = [0, 6].includes(data.getDay());
-    const isFeriado = this.feriados.includes(registro.data);
+        const valorHora = registro.salarioMensal / 220;
+        const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
+        const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
 
-    // NOVO: Verifica feriado personalizado
-    const feriadosPersonalizados = this.getFeriadosPersonalizados();
-    const isFeriadoPersonalizado = feriadosPersonalizados.includes(registro.data);
+        let minutos = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
+        if (minutos < 0) minutos += 1440;
 
-    let valor75 = 0, valor100 = 0;
-    if (isFimSemana || isFeriado || isFeriadoPersonalizado) {
-        valor100 = horas * valorHora * 2;
-    } else {
-        const normal = Math.min(horas, 2);
-        const extra = Math.max(horas - 2, 0);
-        valor75 = normal * valorHora * 1.75;
-        valor100 = extra * valorHora * 2;
+        const horas = minutos / 60;
+        const data = new Date(registro.data + 'T00:00:00');
+        const isFimSemana = [0, 6].includes(data.getDay());
+        const isFeriado = this.feriados.includes(registro.data);
+        const isFeriadoPersonalizado = this.getFeriadosPersonalizados().includes(registro.data);
+
+        let valor75 = 0, valor100 = 0;
+
+        if (isFimSemana || isFeriado || isFeriadoPersonalizado) {
+            valor100 = horas * valorHora * 2;
+        } else {
+            const normal = Math.min(horas, 2);
+            const extra = Math.max(horas - 2, 0);
+            valor75 = normal * valorHora * 1.75;
+            valor100 = extra * valorHora * 2;
+        }
+
+        return {
+            total: valor75 + valor100,
+            valor75,
+            valor100,
+            tipo: (isFimSemana || isFeriado || isFeriadoPersonalizado) ? '100%' : (horas <= 2 ? '75%' : '75%/100%')
+        };
     }
-    return {
-        total: valor75 + valor100,
-        valor75,
-        valor100,
-        tipo: (isFimSemana || isFeriado || isFeriadoPersonalizado) ? '100%' : (horas <= 2 ? '75%' : '75%/100%')
-    };
-}
-
 
     renderizarTabela() {
         const tbody = document.querySelector('#registros tbody');
         tbody.innerHTML = '';
         let total75 = 0, total100 = 0, totalGeral = 0;
-        const registrosFiltrados = this.filtroAtivo ? 
+
+        const registrosFiltrados = this.filtroAtivo ?
             this.registros.filter(r => {
                 const dataRegistro = new Date(r.data + 'T00:00:00');
                 return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
@@ -215,7 +246,9 @@ class GerenciadorHoras {
             tr.innerHTML = `
                 <td>${registro.data}</td>
                 <td>${registro.inicio} - ${registro.fim}</td>
-                <td>R$ ${result.total.toFixed(2)} <span style="color: #666; font-size: 0.9em">${result.tipo}</span></td>
+                <td title="Salário base: R$ ${registro.salarioMensal.toFixed(2)}\nValor/hora: R$ ${(registro.salarioMensal / 220).toFixed(2)}">
+                    R$ ${result.total.toFixed(2)} <span style="color: #666; font-size: 0.9em">${result.tipo}</span>
+                </td>
                 <td>${registro.justificativa}</td>
                 <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})">🗑️</button></td>
             `;
@@ -225,6 +258,89 @@ class GerenciadorHoras {
         document.getElementById('valor75').textContent = total75.toFixed(2);
         document.getElementById('valor100').textContent = total100.toFixed(2);
         document.getElementById('totalGeral').textContent = totalGeral.toFixed(2);
+
+        this.renderizarGrafico();
+        this.calcularFadiga();
+    }
+
+    calcularFadiga() {
+        const hoje = new Date();
+        const ultimos7Dias = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date(hoje);
+            date.setDate(date.getDate() - i);
+            return date.toISOString().slice(0, 10);
+        });
+
+        let totalHoras = 0;
+        let maxConsecutivo = 0;
+        let currentStreak = 0;
+
+        const datasOrdenadas = [...new Set(this.registros.map(r => r.data))].sort();
+        datasOrdenadas.forEach((data, index) => {
+            if (index > 0) {
+                const diffDays = Math.floor((new Date(data) - new Date(datasOrdenadas[index - 1])) / (1000 * 60 * 60 * 24));
+                currentStreak = diffDays === 1 ? currentStreak + 1 : 0;
+                if (currentStreak > maxConsecutivo) maxConsecutivo = currentStreak;
+            }
+        });
+
+        this.registros.forEach(registro => {
+            if (ultimos7Dias.includes(registro.data)) {
+                const result = this.calcularValor(registro);
+                totalHoras += result.total / (registro.salarioMensal / 220);
+            }
+        });
+
+        let nivel = '🟢 Normal';
+        let tooltip = 'Nível de fadiga dentro do esperado';
+        if (totalHoras > 20 || maxConsecutivo >= 5) {
+            nivel = '🔴 Crítico';
+            tooltip = 'Alerta! Risco alto de fadiga acumulada';
+        } else if (totalHoras > 15 || maxConsecutivo >= 3) {
+            nivel = '🟠 Atenção';
+            tooltip = 'Carga de trabalho elevada, considere reduzir horas';
+        }
+
+        document.getElementById('nivelFadiga').innerHTML = nivel;
+        document.getElementById('nivelFadiga').title = tooltip;
+    }
+
+    renderizarGrafico() {
+        const ctx = document.getElementById('graficoHoras').getContext('2d');
+        if (this.grafico) this.grafico.destroy();
+
+        const periodos = {};
+        this.registros.forEach(registro => {
+            const mes = registro.data.slice(0, 7);
+            if (!periodos[mes]) periodos[mes] = 0;
+            const result = this.calcularValor(registro);
+            periodos[mes] += result.total;
+        });
+
+        this.grafico = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(periodos),
+                datasets: [{
+                    label: 'Valor Total (R$)',
+                    data: Object.values(periodos),
+                    borderColor: '#3498db',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0.4
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => 'R$ ' + value.toFixed(2)
+                        }
+                    }
+                }
+            }
+        });
     }
 
     excluirRegistro(id) {
@@ -303,6 +419,7 @@ class GerenciadorHoras {
             { header: 'Tipo', key: 'tipo', width: 10 },
             { header: 'Justificativa', key: 'justificativa', width: 50 }
         ];
+
         this.registros.forEach(registro => {
             const result = this.calcularValor(registro);
             worksheet.addRow({
@@ -313,6 +430,7 @@ class GerenciadorHoras {
                 justificativa: registro.justificativa
             });
         });
+
         workbook.xlsx.writeBuffer().then(buffer => {
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             saveAs(blob, `horas_extras_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -336,17 +454,17 @@ class GerenciadorHoras {
 
     exportarWord() {
         if (!this.currentUser) return alert('Faça login primeiro!');
-        let content = `<h1>Relatório de Horas Extras - ${this.currentUser}</h1>`;
+        let content = `<h1>Relatório de Horas Extras - ${this.currentUser}</h1><table border="1"><tr><th>Data</th><th>Horas</th><th>Valor</th><th>Tipo</th><th>Justificativa</th></tr>`;
         this.registros.forEach(registro => {
             const result = this.calcularValor(registro);
-            content += `<p>${registro.data} | ${registro.inicio}-${registro.fim} | R$ ${result.total.toFixed(2)} (${result.tipo})</p>`;
+            content += `<tr><td>${registro.data}</td><td>${registro.inicio}-${registro.fim}</td><td>R$ ${result.total.toFixed(2)}</td><td>${result.tipo}</td><td>${registro.justificativa}</td></tr>`;
         });
+        content += '</table>';
         const blob = new Blob([content], { type: 'application/msword' });
         saveAs(blob, 'relatorio.doc');
     }
 }
 
-// Inicialização
 window.gerenciador = new GerenciadorHoras();
 window.exportarExcel = () => gerenciador.exportarExcel();
 window.exportarPDF = () => gerenciador.exportarPDF();
