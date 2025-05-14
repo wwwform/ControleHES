@@ -488,3 +488,11 @@ window.exportarBackup = () => gerenciador.exportarBackup();
 window.aplicarFiltroPersonalizado = () => gerenciador.aplicarFiltroPersonalizado();
 window.filtrarPorMes = () => gerenciador.filtrarPorMes();
 window.limparFiltros = () => gerenciador.limparFiltros();
+// Garante que o Google está carregado
+    const checkGoogle = setInterval(() => {
+        if (window.google && google.accounts && google.accounts.id) {
+            window.gerenciador.initGoogle();
+            clearInterval(checkGoogle);
+        }
+    }, 100);
+});
