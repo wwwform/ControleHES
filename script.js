@@ -19,12 +19,12 @@ class GerenciadorHoras {
 
     initGoogle() {
         google.accounts.id.initialize({
-            client_id: 'SEU_CLIENT_ID.apps.googleusercontent.com',
+            client_id: 'SEU_CLIENT_ID.apps.googleusercontent.com', // Substitua pelo seu Client ID
             callback: (response) => this.handleGoogleLogin(response)
         });
         google.accounts.id.renderButton(
             document.getElementById('btnGoogleLogin'),
-            { theme: 'filled_blue', size: 'medium' }
+            { theme: 'filled_blue', text: 'continue_with', size: 'large' }
         );
     }
 
@@ -73,9 +73,7 @@ class GerenciadorHoras {
                 return;
             }
         } else {
-            localStorage.setItem('credenciaisHE_' + username, JSON.stringify({
-                senha: btoa(senha)
-            }));
+            localStorage.setItem('credenciaisHE_' + username, JSON.stringify({ senha: btoa(senha) }));
         }
 
         this.currentUser = username;
@@ -243,18 +241,15 @@ class GerenciadorHoras {
             totalGeral += result.total;
 
             const tr = document.createElement('tr');
-            // No método renderizarTabela():
-tr.innerHTML = `
-    <td>${registro.data}</td>
-    <td>${registro.inicio} - ${registro.fim}</td>
-    <td data-salario="${registro.salarioMensal}" class="valor-hora-cell" title="Salário base: R$ ${registro.salarioMensal.toFixed(2)} | Valor/hora: R$ ${(registro.salarioMensal/220).toFixed(2)}">
-        R$ ${result.total.toFixed(2)} ${result.tipo}
-    </td>
-    <td>${registro.justificativa}</td>
-    <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})">🗑️</button></td>
-`;
-
-
+            tr.innerHTML = `
+                <td>${registro.data}</td>
+                <td>${registro.inicio} - ${registro.fim}</td>
+                <td title="Salário base: R$ ${registro.salarioMensal.toFixed(2)} | Valor/hora: R$ ${(registro.salarioMensal / 220).toFixed(2)}">
+                    R$ ${result.total.toFixed(2)} <span style="color: #666; font-size: 0.9em">${result.tipo}</span>
+                </td>
+                <td>${registro.justificativa}</td>
+                <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})">🗑️</button></td>
+            `;
             tbody.appendChild(tr);
         });
 
@@ -262,122 +257,106 @@ tr.innerHTML = `
         document.getElementById('valor100').textContent = total100.toFixed(2);
         document.getElementById('totalGeral').textContent = totalGeral.toFixed(2);
 
-        this.renderizarGrafico();
         this.calcularFadiga();
+        this.renderizarGrafico();
     }
 
     calcularFadiga() {
-    // Usa registros filtrados (do período selecionado)
-    const registrosFiltrados = this.filtroAtivo ?
-        this.registros.filter(r => {
-            const dataRegistro = new Date(r.data + 'T00:00:00');
-            return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
-        }) : this.registros;
+        const registrosFiltrados = this.filtroAtivo ?
+            this.registros.filter(r => {
+                const dataRegistro = new Date(r.data + 'T00:00:00');
+                return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
+            }) : this.registros;
 
-    let totalHoras = 0;
-    let diasConsecutivos = 0;
-    let maxConsecutivo = 0;
-    let datasOrdenadas = [];
+        let totalHoras = 0;
+        let diasConsecutivos = 0;
+        let maxConsecutivo = 0;
+        let datasOrdenadas = [];
 
-    // Calcula horas extras e dias consecutivos
-    registrosFiltrados.forEach(registro => {
-        const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
-        const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
-        let minutos = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
-        if (minutos < 0) minutos += 1440;
-        totalHoras += minutos / 60;
-        datasOrdenadas.push(registro.data);
-    });
+        registrosFiltrados.forEach(registro => {
+            const [h1, m1] = registro.inicio.split(':').map(Number);
+            const [h2, m2] = registro.fim.split(':').map(Number);
+            let minutos = (h2 * 60 + m2) - (h1 * 60 + m1);
+            if (minutos < 0) minutos += 1440;
+            totalHoras += minutos / 60;
+            datasOrdenadas.push(registro.data);
+        });
 
-    // Ordena datas e verifica dias consecutivos
-    datasOrdenadas = [...new Set(datasOrdenadas)].sort();
-    let currentStreak = 0;
-    datasOrdenadas.forEach((data, index) => {
-        if (index > 0) {
-            const diffDays = (new Date(data) - new Date(datasOrdenadas[index - 1])) / (1000 * 60 * 60 * 24);
-            currentStreak = diffDays === 1 ? currentStreak + 1 : 0;
-            if (currentStreak > maxConsecutivo) maxConsecutivo = currentStreak;
+        datasOrdenadas = [...new Set(datasOrdenadas)].sort();
+        let currentStreak = 0;
+        datasOrdenadas.forEach((data, index) => {
+            if (index > 0) {
+                const diffDays = (new Date(data) - new Date(datasOrdenadas[index - 1])) / (1000 * 60 * 60 * 24);
+                currentStreak = diffDays === 1 ? currentStreak + 1 : 0;
+                if (currentStreak > maxConsecutivo) maxConsecutivo = currentStreak;
+            }
+        });
+
+        let nivel = '🟢 Normal';
+        if (totalHoras > 20 || maxConsecutivo >= 5) {
+            nivel = '🔴 Crítico';
+        } else if (totalHoras > 15 || maxConsecutivo >= 3) {
+            nivel = '🟠 Atenção';
         }
-    });
 
-    // Define nível de fadiga
-    let nivel = '🟢 Normal';
-    if (totalHoras > 20 || maxConsecutivo >= 5) {
-        nivel = '🔴 Crítico';
-    } else if (totalHoras > 15 || maxConsecutivo >= 3) {
-        nivel = '🟠 Atenção';
+        document.getElementById('nivelFadiga').innerHTML = nivel;
     }
 
-    // Atualiza a exibição (sem tooltip)
-    document.getElementById('nivelFadiga').innerHTML = nivel;
-}
-
-    this.calcularFadiga();
-    this.renderizarGrafico();
-
-
     renderizarGrafico() {
-    const ctx = document.getElementById('graficoHoras').getContext('2d');
-    if (this.grafico) this.grafico.destroy();
+        const ctx = document.getElementById('graficoHoras').getContext('2d');
+        if (this.grafico) this.grafico.destroy();
 
-    // Agrupar por mês e separar valores de 75% e 100%
-    const meses = {};
-    this.registros.forEach(registro => {
-        const mes = registro.data.slice(0, 7); // YYYY-MM
-        if (!meses[mes]) meses[mes] = { valor75: 0, valor100: 0 };
-        const result = this.calcularValor(registro);
-        meses[mes].valor75 += result.valor75;
-        meses[mes].valor100 += result.valor100;
-    });
+        const periodos = {};
+        this.registros.forEach(registro => {
+            const mes = registro.data.slice(0, 7);
+            if (!periodos[mes]) periodos[mes] = { valor75: 0, valor100: 0 };
+            const result = this.calcularValor(registro);
+            periodos[mes].valor75 += result.valor75;
+            periodos[mes].valor100 += result.valor100;
+        });
 
-    const labels = Object.keys(meses);
-    const dados75 = labels.map(mes => meses[mes].valor75);
-    const dados100 = labels.map(mes => meses[mes].valor100);
-    const dadosTotal = labels.map(mes => meses[mes].valor75 + meses[mes].valor100);
+        const labels = Object.keys(periodos);
+        const dados75 = labels.map(mes => periodos[mes].valor75);
+        const dados100 = labels.map(mes => periodos[mes].valor100);
+        const dadosTotal = labels.map(mes => periodos[mes].valor75 + periodos[mes].valor100);
 
-    this.grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Horas 75%',
-                    data: dados75,
-                    backgroundColor: '#3498db',
-                    borderColor: '#2980b9',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Horas 100%',
-                    data: dados100,
-                    backgroundColor: '#e74c3c',
-                    borderColor: '#c0392b',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Total',
-                    data: dadosTotal,
-                    type: 'line',
-                    borderDash: [5, 5],
-                    fill: false,
-                    borderColor: '#2c3e50'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: (value) => 'R$ ' + value.toFixed(2)
+        this.grafico = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Horas 75%',
+                        data: dados75,
+                        backgroundColor: '#3498db',
+                    },
+                    {
+                        label: 'Horas 100%',
+                        data: dados100,
+                        backgroundColor: '#e74c3c',
+                    },
+                    {
+                        label: 'Total (Linha)',
+                        data: dadosTotal,
+                        type: 'line',
+                        borderColor: '#2c3e50',
+                        borderDash: [5, 5],
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => 'R$ ' + value.toFixed(2)
+                        }
                     }
                 }
             }
-        }
-    });
-}
-
+        });
+    }
 
     excluirRegistro(id) {
         this.registros = this.registros.filter(r => r.id !== id);
