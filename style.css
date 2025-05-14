@@ -124,41 +124,47 @@ body {
 }
 
 .config-salario {
-    background: #eaf4ff;
-    padding: 18px 20px;
-    border-radius: 10px;
+    background: none;
+    padding: 0;
     margin-bottom: 22px;
     display: flex;
     align-items: center;
-    gap: 18px;
-    flex-wrap: wrap;
+    gap: 16px;
 }
-.config-salario h3 {
-    margin: 0 18px 0 0;
-    font-size: 1.08em;
-    color: var(--primary);
-    font-weight: 600;
-    flex-shrink: 0;
-}
-.config-salario input[type="number"] {
-    width: 160px;
-    padding: 9px 10px;
-    border: var(--border);
-    border-radius: 8px;
-    font-size: 1em;
-}
-.config-salario button {
+#btnEditarSalario {
     background: var(--secondary);
     color: #fff;
     border: none;
     border-radius: 8px;
-    padding: 9px 18px;
+    padding: 8px 18px;
     font-size: 1em;
     cursor: pointer;
     transition: background 0.2s;
 }
-.config-salario button:hover {
+#btnEditarSalario:hover {
     background: var(--hover);
+}
+#formSalario input {
+    padding: 8px 10px;
+    border: var(--border);
+    border-radius: 8px;
+    font-size: 1em;
+    width: 140px;
+    margin-right: 8px;
+}
+#formSalario button {
+    background: var(--secondary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-right: 6px;
+}
+#formSalario button[type="button"] {
+    background: #ccc;
+    color: #222;
 }
 
 .feriados-personalizados {
