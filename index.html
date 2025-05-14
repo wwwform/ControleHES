@@ -14,15 +14,43 @@
 <body>
     <!-- Login -->
     <div id="loginContainer" class="login-container">
-        <h2><span style="font-size:1.2em;">🔒</span> Login</h2>
-        <div class="login-form-row">
-            <input type="text" id="loginUsername" placeholder="Usuário" required>
+        <div id="loginForm">
+            <h2><span style="font-size:1.2em;">🔒</span> Login</h2>
+            <div class="login-form-row">
+                <input type="text" id="loginUsername" placeholder="Email ou usuário" required>
+            </div>
+            <div class="login-form-row">
+                <input type="password" id="loginSenha" placeholder="Senha" required>
+            </div>
+            <button id="btnLogin" class="btn-primary btn-block">Entrar</button>
+            <div class="login-separator">
+                <span>ou</span>
+            </div>
+            <div id="btnGoogleLogin" class="google-btn"></div>
+            <div class="login-footer">
+                <p>Não tem uma conta? <button id="btnCadastrar" class="btn-link">Cadastre-se</button></p>
+            </div>
         </div>
-        <div class="login-form-row">
-            <input type="password" id="loginSenha" placeholder="Senha" required>
+        
+        <!-- Registro de novo usuário -->
+        <div id="registroContainer" style="display:none">
+            <h2><span style="font-size:1.2em;">📝</span> Cadastro</h2>
+            <form id="formRegistro">
+                <div class="login-form-row">
+                    <input type="email" id="regEmail" placeholder="Seu email" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="password" id="regSenha" placeholder="Crie uma senha" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="password" id="regConfirmSenha" placeholder="Confirme a senha" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Cadastrar</button>
+                <div class="login-footer">
+                    <button type="button" id="btnVoltarLogin" class="btn-link">Voltar para o login</button>
+                </div>
+            </form>
         </div>
-        <button id="btnLogin">Entrar</button>
-        <div id="btnGoogleLogin" class="google-btn"></div>
     </div>
 
     <!-- Conteúdo Principal -->
@@ -32,7 +60,7 @@
             <h1>🕒 Controle de Horas Extras Pro</h1>
             <div>
                 <span id="userGreeting"></span>
-                <button id="btnLogout" class="logout-btn">Sair</button>
+                <button id="btnLogout" class="btn-outline">Sair</button>
             </div>
         </div>
 
@@ -41,20 +69,19 @@
 
         <!-- Botão para editar salário -->
         <div class="config-salario" id="configSalarioBox">
-            <button id="btnEditarSalario" type="button">Editar Salário</button>
+            <button id="btnEditarSalario" class="btn-secondary">Editar Salário</button>
             <form id="formSalario" style="display:none; margin-top:10px;">
                 <input type="number" id="novoSalario" step="0.01" placeholder="Novo salário (R$)" required>
-                <button type="submit">Salvar</button>
-                <button type="button" id="btnCancelarSalario">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar</button>
+                <button type="button" id="btnCancelarSalario" class="btn-outline">Cancelar</button>
             </form>
         </div>
-
 
         <!-- Feriados Personalizados -->
         <div class="feriados-personalizados">
             <h3>🌟 Feriados Personalizados</h3>
             <input type="date" id="novoFeriado">
-            <button id="btnAddFeriado">Adicionar</button>
+            <button id="btnAddFeriado" class="btn-primary">Adicionar</button>
             <ul id="listaFeriadosPersonalizados"></ul>
         </div>
 
@@ -66,13 +93,13 @@
                 <input type="time" id="horaFim" required>
             </div>
             <textarea id="justificativa" placeholder="Justificativa" required></textarea>
-            <button type="submit">💾 Salvar Registro</button>
+            <button type="submit" class="btn-primary">💾 Salvar Registro</button>
         </form>
 
         <!-- Backup -->
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
-            <button onclick="exportarBackup()">Exportar Backup</button>
+            <button onclick="exportarBackup()" class="btn-secondary">Exportar Backup</button>
             <input type="file" id="btnImportBackup" accept=".json" style="display:none;">
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
@@ -81,18 +108,27 @@
         <div class="resumo">
             <h2 id="periodoResumo"></h2>
             <div id="valores">
-                <p>75%: R$ <span id="valor75">0.00</span></p>
-                <p>100%: R$ <span id="valor100">0.00</span></p>
-                <p>Total: R$ <span id="totalGeral">0.00</span></p>
+                <div class="valor-card">
+                    <span class="valor-label">75%</span>
+                    <span class="valor-value">R$ <span id="valor75">0.00</span></span>
+                </div>
+                <div class="valor-card">
+                    <span class="valor-label">100%</span>
+                    <span class="valor-value">R$ <span id="valor100">0.00</span></span>
+                </div>
+                <div class="valor-card total">
+                    <span class="valor-label">Total</span>
+                    <span class="valor-value">R$ <span id="totalGeral">0.00</span></span>
+                </div>
             </div>
             <div class="indicador-fadiga">
                 <h3>⚠️ Indicador de Fadiga</h3>
                 <div id="nivelFadiga"></div>
             </div>
             <div class="botoes-exportacao">
-                <button onclick="exportarExcel()">📊 Excel</button>
-                <button onclick="exportarPDF()">📄 PDF</button>
-                <button onclick="exportarWord()">📑 Word</button>
+                <button onclick="exportarExcel()" class="btn-secondary">📊 Excel</button>
+                <button onclick="exportarPDF()" class="btn-secondary">📄 PDF</button>
+                <button onclick="exportarWord()" class="btn-secondary">📑 Word</button>
             </div>
         </div>
 
@@ -101,8 +137,8 @@
             <input type="month" id="filtroMes">
             <input type="date" id="filtroInicio">
             <input type="date" id="filtroFim">
-            <button onclick="aplicarFiltroPersonalizado()">🔎 Filtrar</button>
-            <button onclick="limparFiltros()">🔄 Limpar Filtros</button>
+            <button onclick="aplicarFiltroPersonalizado()" class="btn-secondary">🔎 Filtrar</button>
+            <button onclick="limparFiltros()" class="btn-outline">🔄 Limpar</button>
         </div>
 
         <!-- Tabela -->
