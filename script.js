@@ -19,7 +19,7 @@ class GerenciadorHoras {
 
     initGoogle() {
         google.accounts.id.initialize({
-            client_id: '845191547210-0bs3opp2qdrqsocc3c2k373p84b4a8n8.apps.googleusercontent.com',
+            client_id: 'SEU_CLIENT_ID.apps.googleusercontent.com',
             callback: (response) => this.handleGoogleLogin(response)
         });
         google.accounts.id.renderButton(
@@ -40,53 +40,78 @@ class GerenciadorHoras {
     }
 
     configurarEventos() {
-        // Login e Cadastro
         document.getElementById('btnLogin').addEventListener('click', () => this.realizarLogin());
         document.getElementById('btnLogout').addEventListener('click', () => this.realizarLogout());
         document.getElementById('btnCadastrar').addEventListener('click', () => this.mostrarRegistro());
         document.getElementById('btnVoltarLogin').addEventListener('click', () => this.mostrarLogin());
+        document.getElementById('btnVoltarLogin2').addEventListener('click', () => this.mostrarLogin());
+        document.getElementById('btnEsqueciSenha').addEventListener('click', () => {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registroContainer').style.display = 'none';
+            document.getElementById('recuperarSenhaContainer').style.display = 'block';
+        });
         document.getElementById('formRegistro').addEventListener('submit', (e) => this.registrarUsuario(e));
-        
-        // Funcionalidades principais
         document.getElementById('registroForm').addEventListener('submit', (e) => this.salvarRegistro(e));
         document.getElementById('btnImportBackup').addEventListener('change', (e) => this.importarBackup(e));
         document.getElementById('btnAddFeriado').addEventListener('click', () => this.adicionarFeriadoPersonalizado());
-        
-        // Edição de Salário
-        document.getElementById('btnEditarSalario').addEventListener('click', () => {
-            document.getElementById('formSalario').style.display = 'block';
-            document.getElementById('btnEditarSalario').style.display = 'none';
-            const salarioAtual = localStorage.getItem(`salarioHE_${this.currentUser}`);
-            document.getElementById('novoSalario').value = salarioAtual || '';
-        });
-        
-        document.getElementById('btnCancelarSalario').addEventListener('click', () => {
-            document.getElementById('formSalario').style.display = 'none';
-            document.getElementById('btnEditarSalario').style.display = 'inline-block';
-        });
-        
         document.getElementById('formSalario').addEventListener('submit', (e) => {
             e.preventDefault();
             const novoSalario = parseFloat(document.getElementById('novoSalario').value);
             if (!isNaN(novoSalario) && novoSalario > 0) {
                 localStorage.setItem(`salarioHE_${this.currentUser}`, novoSalario);
-                alert('Salário atualizado! Os novos lançamentos usarão o novo valor.');
+                alert('Salário atualizado!');
                 document.getElementById('formSalario').style.display = 'none';
                 document.getElementById('btnEditarSalario').style.display = 'inline-block';
             } else {
                 alert('Digite um valor válido!');
             }
         });
+        document.getElementById('btnEditarSalario').addEventListener('click', () => {
+            document.getElementById('formSalario').style.display = 'block';
+            document.getElementById('btnEditarSalario').style.display = 'none';
+        });
+        document.getElementById('btnCancelarSalario').addEventListener('click', () => {
+            document.getElementById('formSalario').style.display = 'none';
+            document.getElementById('btnEditarSalario').style.display = 'inline-block';
+        });
+        document.getElementById('formRecuperarSenha').addEventListener('submit', (e) => this.redefinirSenha(e));
     }
 
     mostrarRegistro() {
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('registroContainer').style.display = 'block';
+        document.getElementById('recuperarSenhaContainer').style.display = 'none';
     }
 
     mostrarLogin() {
         document.getElementById('loginForm').style.display = 'block';
         document.getElementById('registroContainer').style.display = 'none';
+        document.getElementById('recuperarSenhaContainer').style.display = 'none';
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('mainContent').style.display = 'none';
+    }
+
+    redefinirSenha(e) {
+        e.preventDefault();
+        const email = document.getElementById('recEmail').value.trim();
+        const novaSenha = document.getElementById('recNovaSenha').value;
+        const confirmSenha = document.getElementById('recConfirmSenha').value;
+
+        if (novaSenha !== confirmSenha) {
+            alert('As senhas não coincidem!');
+            return;
+        }
+
+        const usuarios = JSON.parse(localStorage.getItem('usuariosHE')) || {};
+        if (!usuarios[email]) {
+            alert('Email não encontrado!');
+            return;
+        }
+
+        usuarios[email].senha = btoa(novaSenha);
+        localStorage.setItem('usuariosHE', JSON.stringify(usuarios));
+        alert('Senha redefinida com sucesso!');
+        this.mostrarLogin();
     }
 
     registrarUsuario(e) {
@@ -106,21 +131,15 @@ class GerenciadorHoras {
         }
 
         const usuarios = JSON.parse(localStorage.getItem('usuariosHE')) || {};
-        
         if (usuarios[email]) {
             alert('Este e-mail já está cadastrado!');
             return;
         }
-        
-        usuarios[email] = {
-            nome: nome,
-            senha: btoa(senha)
-        };
-        
+
+        usuarios[email] = { nome: nome, senha: btoa(senha) };
         localStorage.setItem('usuariosHE', JSON.stringify(usuarios));
         alert('Cadastro realizado com sucesso!');
-        
-        // Auto-login após registro
+
         this.currentUser = email;
         localStorage.setItem('currentUserHE', JSON.stringify(email));
         localStorage.setItem('currentUserNameHE', nome);
@@ -186,11 +205,6 @@ class GerenciadorHoras {
         this.renderizarTabela();
     }
 
-    mostrarLogin() {
-        document.getElementById('loginContainer').style.display = 'block';
-        document.getElementById('mainContent').style.display = 'none';
-    }
-
     ocultarLogin() {
         document.getElementById('loginContainer').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
@@ -208,9 +222,7 @@ class GerenciadorHoras {
 
     carregarSalarioUsuario() {
         const salario = localStorage.getItem(`salarioHE_${this.currentUser}`);
-        if (salario) {
-            document.getElementById('novoSalario').value = salario;
-        }
+        document.getElementById('novoSalario').value = salario || '';
     }
 
     getFeriadosPersonalizados() {
@@ -570,8 +582,6 @@ class GerenciadorHoras {
 
 document.addEventListener('DOMContentLoaded', function() {
     window.gerenciador = new GerenciadorHoras();
-    
-    // Funções auxiliares globais
     window.exportarExcel = () => gerenciador.exportarExcel();
     window.exportarPDF = () => gerenciador.exportarPDF();
     window.exportarWord = () => gerenciador.exportarWord();
@@ -579,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.aplicarFiltroPersonalizado = () => gerenciador.aplicarFiltroPersonalizado();
     window.filtrarPorMes = () => gerenciador.filtrarPorMes();
     window.limparFiltros = () => gerenciador.limparFiltros();
-    
+
     // Inicializa Google Login assim que disponível
     const checkGoogle = setInterval(() => {
         if (window.google && google.accounts && google.accounts.id) {
