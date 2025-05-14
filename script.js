@@ -244,14 +244,20 @@ class GerenciadorHoras {
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${registro.data}</td>
-                <td>${registro.inicio} - ${registro.fim}</td>
-                <td title="Salário base: R$ ${registro.salarioMensal.toFixed(2)}\nValor/hora: R$ ${(registro.salarioMensal / 220).toFixed(2)}">
-                    R$ ${result.total.toFixed(2)} <span style="color: #666; font-size: 0.9em">${result.tipo}</span>
-                </td>
-                <td>${registro.justificativa}</td>
-                <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})">🗑️</button></td>
-            `;
+    <td>${registro.data}</td>
+    <td>${registro.inicio} - ${registro.fim}</td>
+    <td>
+        <span 
+            title="Salário base deste cálculo: R$ ${registro.salarioMensal.toFixed(2)}&#10;Valor/hora: R$ ${(registro.salarioMensal / 220).toFixed(2)}"
+            style="cursor: help;"
+        >
+            R$ ${result.total.toFixed(2)} <span style="color: #666; font-size: 0.9em">${result.tipo}</span>
+        </span>
+    </td>
+    <td>${registro.justificativa}</td>
+    <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})">🗑️</button></td>
+`;
+
             tbody.appendChild(tr);
         });
 
@@ -264,46 +270,45 @@ class GerenciadorHoras {
     }
 
     calcularFadiga() {
-        const hoje = new Date();
-        const ultimos7Dias = Array.from({ length: 7 }, (_, i) => {
-            const date = new Date(hoje);
-            date.setDate(date.getDate() - i);
-            return date.toISOString().slice(0, 10);
-        });
-
-        let totalHoras = 0;
-        let maxConsecutivo = 0;
-        let currentStreak = 0;
-
-        const datasOrdenadas = [...new Set(this.registros.map(r => r.data))].sort();
-        datasOrdenadas.forEach((data, index) => {
-            if (index > 0) {
-                const diffDays = Math.floor((new Date(data) - new Date(datasOrdenadas[index - 1])) / (1000 * 60 * 60 * 24));
-                currentStreak = diffDays === 1 ? currentStreak + 1 : 0;
-                if (currentStreak > maxConsecutivo) maxConsecutivo = currentStreak;
-            }
-        });
-
-        this.registros.forEach(registro => {
-            if (ultimos7Dias.includes(registro.data)) {
-                const result = this.calcularValor(registro);
-                totalHoras += result.total / (registro.salarioMensal / 220);
-            }
-        });
-
-        let nivel = '🟢 Normal';
-        let tooltip = 'Nível de fadiga dentro do esperado';
-        if (totalHoras > 20 || maxConsecutivo >= 5) {
-            nivel = '🔴 Crítico';
-            tooltip = 'Alerta! Risco alto de fadiga acumulada';
-        } else if (totalHoras > 15 || maxConsecutivo >= 3) {
-            nivel = '🟠 Atenção';
-            tooltip = 'Carga de trabalho elevada, considere reduzir horas';
-        }
-
-        document.getElementById('nivelFadiga').innerHTML = nivel;
-        document.getElementById('nivelFadiga').title = tooltip;
+    // Considera apenas os últimos 7 dias
+    const hoje = new Date();
+    const ultimos7Dias = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(hoje);
+        date.setDate(date.getDate() - i);
+        ultimos7Dias.push(date.toISOString().slice(0, 10));
     }
+
+    let totalHoras = 0;
+    let diasComLancamento = new Set();
+
+    this.registros.forEach(registro => {
+        if (ultimos7Dias.includes(registro.data)) {
+            const [h1, m1] = registro.inicio.split(':').map(Number);
+            const [h2, m2] = registro.fim.split(':').map(Number);
+            let minutos = (h2 * 60 + m2) - (h1 * 60 + m1);
+            if (minutos < 0) minutos += 1440;
+            totalHoras += minutos / 60;
+            diasComLancamento.add(registro.data);
+        }
+    });
+
+    let nivel = '🟢 Normal';
+    let tooltip = 'Nível de fadiga dentro do esperado';
+    if (totalHoras > 20 || diasComLancamento.size >= 6) {
+        nivel = '🔴 Crítico';
+        tooltip = 'Alerta! Risco alto de fadiga acumulada';
+    } else if (totalHoras > 15 || diasComLancamento.size >= 4) {
+        nivel = '🟠 Atenção';
+        tooltip = 'Carga de trabalho elevada, considere reduzir horas';
+    }
+
+    document.getElementById('nivelFadiga').innerHTML = nivel;
+    document.getElementById('nivelFadiga').title = tooltip + `\nHoras extras nos últimos 7 dias: ${totalHoras.toFixed(1)}h\nDias com lançamento: ${diasComLancamento.size}`;
+}
+    this.calcularFadiga();
+    this.renderizarGrafico();
+
 
     renderizarGrafico() {
         const ctx = document.getElementById('graficoHoras').getContext('2d');
