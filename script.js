@@ -495,4 +495,3 @@ const checkGoogle = setInterval(() => {
             clearInterval(checkGoogle);
         }
     }, 100);
-});
