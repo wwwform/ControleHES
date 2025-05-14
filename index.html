@@ -39,12 +39,16 @@
         <!-- Notificações -->
         <div id="notificacoes" class="notificacao"></div>
 
-        <!-- Configuração do Salário -->
-        <div class="config-salario">
-            <h3>⚙️ Configuração do Salário</h3>
-            <input type="number" id="salarioAtual" step="0.01" placeholder="Salário atual (R$)" required>
-            <button id="btnAtualizarSalario">Atualizar Salário</button>
+        <!-- Botão para editar salário -->
+        <div class="config-salario" id="configSalarioBox">
+            <button id="btnEditarSalario" type="button">Editar Salário</button>
+            <form id="formSalario" style="display:none; margin-top:10px;">
+                <input type="number" id="novoSalario" step="0.01" placeholder="Novo salário (R$)" required>
+                <button type="submit">Salvar</button>
+                <button type="button" id="btnCancelarSalario">Cancelar</button>
+            </form>
         </div>
+
 
         <!-- Feriados Personalizados -->
         <div class="feriados-personalizados">
