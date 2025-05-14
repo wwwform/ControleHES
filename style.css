@@ -438,3 +438,359 @@ tr:hover {
         gap: 4px;
     }
 }
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px;
+    background: var(--bg-box);
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 18px;
+    color: var(--primary);
+    font-size: 1.5em;
+}
+
+.login-container input {
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+#btnLogin {
+    width: 100%;
+    padding: 12px;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.google-btn {
+    width: 100%;
+    padding: 12px;
+    background: #4285f4 !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--bg-box);
+    padding: 28px 32px 32px 32px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.logout-btn {
+    background: var(--error);
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.notificacao {
+    padding: 14px 18px;
+    margin: 18px 0 12px 0;
+    background: #fff3cd;
+    border-radius: 8px;
+    color: #856404;
+    font-weight: 500;
+    border: 1px solid #ffeeba;
+}
+
+.config-salario {
+    background: #eaf4ff;
+    padding: 18px 20px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.config-salario h3 {
+    margin: 0 18px 0 0;
+    font-size: 1.08em;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.config-salario input {
+    width: 160px;
+    padding: 9px 10px;
+    border: var(--border);
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+.config-salario button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.feriados-personalizados {
+    background: #f7f9fb;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    border: 1px solid #e0e5ec;
+}
+
+.feriados-personalizados h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.05em;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.feriados-personalizados input {
+    padding: 8px 10px;
+    border: 1.5px solid #ccd;
+    border-radius: 8px;
+    font-size: 1em;
+    margin-right: 8px;
+}
+
+.feriados-personalizados button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.feriados-personalizados ul {
+    margin: 10px 0 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.feriados-personalizados li {
+    background: #e3f2fd;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.97em;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.feriados-personalizados .remove-feriado {
+    color: var(--error);
+    cursor: pointer;
+    font-size: 1.1em;
+    border: none;
+    background: none;
+    margin-left: 2px;
+}
+
+#registroForm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.time-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+#registroForm input,
+#registroForm textarea {
+    padding: 12px;
+    border: var(--border);
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+#registroForm button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    grid-column: span 2;
+}
+
+#backupSection {
+    margin: 20px 0 22px 0;
+    padding: 14px 20px 12px 20px;
+    background: #f8f8fc;
+    border-radius: 8px;
+    border: var(--border);
+}
+
+.file-label {
+    display: inline-block;
+    padding: 8px 15px;
+    background: var(--secondary);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.resumo {
+    background: #f8f9fa;
+    padding: 18px 20px 10px 20px;
+    border-radius: 10px;
+    margin: 18px 0 14px 0;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.05);
+}
+
+#valores {
+    display: flex;
+    justify-content: space-around;
+    margin: 12px 0 10px 0;
+    font-size: 1.08em;
+    font-weight: 500;
+}
+
+.indicador-fadiga {
+    background: #fff3e0;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    cursor: help;
+}
+
+#nivelFadiga {
+    font-size: 1.5em;
+    margin: 10px 0;
+}
+
+.botoes-exportacao {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.botoes-exportacao button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.filtros {
+    display: flex;
+    gap: 10px;
+    margin: 18px 0 12px 0;
+    flex-wrap: wrap;
+}
+
+.filtros input {
+    padding: 8px 12px;
+    border-radius: 7px;
+    border: 1.2px solid #ccc;
+    font-size: 1em;
+}
+
+.filtros button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 5px rgba(44,62,80,0.06);
+}
+
+th, td {
+    padding: 13px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 1em;
+}
+
+th {
+    background: #f2f6fc;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.btn-excluir {
+    background: none;
+    border: none;
+    color: var(--error);
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.grafico-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    #registroForm {
+        grid-template-columns: 1fr;
+    }
+    #registroForm button {
+        grid-column: span 1;
+    }
+    .filtros {
+        flex-direction: column;
+    }
+    #valores {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
