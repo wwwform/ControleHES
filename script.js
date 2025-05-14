@@ -19,7 +19,7 @@ class GerenciadorHoras {
 
     initGoogle() {
         google.accounts.id.initialize({
-            client_id: 'SEU_CLIENT_ID.apps.googleusercontent.com', // Substitua pelo seu Client ID
+            client_id: '845191547210-0bs3opp2qdrqsocc3c2k373p84b4a8n8.apps.googleusercontent.com', // Substitua pelo seu Client ID
             callback: (response) => this.handleGoogleLogin(response)
         });
         google.accounts.id.renderButton(
