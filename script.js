@@ -33,25 +33,26 @@ class GerenciadorHoras {
         const payload = JSON.parse(atob(credential.split('.')[1]));
         this.currentUser = payload.email;
         localStorage.setItem('currentUserHE', JSON.stringify(this.currentUser));
+        localStorage.setItem('currentUserNameHE', payload.name || this.currentUser);
         this.ocultarLogin();
         this.carregarRegistrosUsuario();
         this.renderizarTabela();
     }
 
     configurarEventos() {
-        // Eventos de login
+        // Login e Cadastro
         document.getElementById('btnLogin').addEventListener('click', () => this.realizarLogin());
         document.getElementById('btnLogout').addEventListener('click', () => this.realizarLogout());
         document.getElementById('btnCadastrar').addEventListener('click', () => this.mostrarRegistro());
         document.getElementById('btnVoltarLogin').addEventListener('click', () => this.mostrarLogin());
         document.getElementById('formRegistro').addEventListener('submit', (e) => this.registrarUsuario(e));
         
-        // Eventos principais
+        // Funcionalidades principais
         document.getElementById('registroForm').addEventListener('submit', (e) => this.salvarRegistro(e));
         document.getElementById('btnImportBackup').addEventListener('change', (e) => this.importarBackup(e));
         document.getElementById('btnAddFeriado').addEventListener('click', () => this.adicionarFeriadoPersonalizado());
         
-        // Eventos de edição de salário
+        // Edição de Salário
         document.getElementById('btnEditarSalario').addEventListener('click', () => {
             document.getElementById('formSalario').style.display = 'block';
             document.getElementById('btnEditarSalario').style.display = 'none';
@@ -90,15 +91,20 @@ class GerenciadorHoras {
 
     registrarUsuario(e) {
         e.preventDefault();
-        const email = document.getElementById('regEmail').value;
+        const nome = document.getElementById('regNome').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
         const senha = document.getElementById('regSenha').value;
         const confirmSenha = document.getElementById('regConfirmSenha').value;
-        
+
+        if (!nome) {
+            alert('Informe seu nome!');
+            return;
+        }
         if (senha !== confirmSenha) {
             alert('As senhas não coincidem!');
             return;
         }
-        
+
         const usuarios = JSON.parse(localStorage.getItem('usuariosHE')) || {};
         
         if (usuarios[email]) {
@@ -107,7 +113,8 @@ class GerenciadorHoras {
         }
         
         usuarios[email] = {
-            senha: btoa(senha) // Codificação simples (não segura para produção)
+            nome: nome,
+            senha: btoa(senha)
         };
         
         localStorage.setItem('usuariosHE', JSON.stringify(usuarios));
@@ -116,6 +123,7 @@ class GerenciadorHoras {
         // Auto-login após registro
         this.currentUser = email;
         localStorage.setItem('currentUserHE', JSON.stringify(email));
+        localStorage.setItem('currentUserNameHE', nome);
         this.ocultarLogin();
         this.carregarRegistrosUsuario();
         this.renderizarTabela();
@@ -139,15 +147,14 @@ class GerenciadorHoras {
             return;
         }
 
-        // Verifica se é um login por email
         if (username.includes('@')) {
             const usuarios = JSON.parse(localStorage.getItem('usuariosHE')) || {};
             if (!usuarios[username] || usuarios[username].senha !== btoa(senha)) {
                 alert('E-mail ou senha incorretos!');
                 return;
             }
+            localStorage.setItem('currentUserNameHE', usuarios[username].nome || username);
         } else {
-            // Login legado por nome de usuário
             const usuarioSalvo = localStorage.getItem('credenciaisHE_' + username);
             if (usuarioSalvo) {
                 const { senha: hashSalvo } = JSON.parse(usuarioSalvo);
@@ -158,6 +165,7 @@ class GerenciadorHoras {
             } else {
                 localStorage.setItem('credenciaisHE_' + username, JSON.stringify({ senha: btoa(senha) }));
             }
+            localStorage.setItem('currentUserNameHE', username);
         }
 
         this.currentUser = username;
@@ -172,6 +180,7 @@ class GerenciadorHoras {
     realizarLogout() {
         this.currentUser = null;
         localStorage.removeItem('currentUserHE');
+        localStorage.removeItem('currentUserNameHE');
         this.mostrarLogin();
         this.registros = [];
         this.renderizarTabela();
@@ -185,7 +194,8 @@ class GerenciadorHoras {
     ocultarLogin() {
         document.getElementById('loginContainer').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
-        document.getElementById('userGreeting').textContent = `Olá, ${this.currentUser}!`;
+        const nome = localStorage.getItem('currentUserNameHE') || this.currentUser;
+        document.getElementById('userGreeting').textContent = `Olá, ${nome}!`;
     }
 
     carregarRegistrosUsuario() {
@@ -251,7 +261,7 @@ class GerenciadorHoras {
 
         const novoRegistro = {
             id: Date.now(),
-            nome: this.currentUser,
+            nome: localStorage.getItem('currentUserNameHE') || this.currentUser,
             data: document.getElementById('data').value,
             inicio: document.getElementById('horaInicio').value,
             fim: document.getElementById('horaFim').value,
@@ -547,7 +557,7 @@ class GerenciadorHoras {
 
     exportarWord() {
         if (!this.currentUser) return alert('Faça login primeiro!');
-        let content = `<h1>Relatório de Horas Extras - ${this.currentUser}</h1><table border="1"><tr><th>Data</th><th>Horas</th><th>Valor</th><th>Tipo</th><th>Justificativa</th></tr>`;
+        let content = `<h1>Relatório de Horas Extras - ${localStorage.getItem('currentUserNameHE') || this.currentUser}</h1><table border="1"><tr><th>Data</th><th>Horas</th><th>Valor</th><th>Tipo</th><th>Justificativa</th></tr>`;
         this.registros.forEach(registro => {
             const result = this.calcularValor(registro);
             content += `<tr><td>${registro.data}</td><td>${registro.inicio}-${registro.fim}</td><td>R$ ${result.total.toFixed(2)}</td><td>${result.tipo}</td><td>${registro.justificativa}</td></tr>`;
