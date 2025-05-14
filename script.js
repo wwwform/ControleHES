@@ -51,11 +51,11 @@ class GerenciadorHoras {
         const salarioAtual = localStorage.getItem(`salarioHE_${this.currentUser}`);
         document.getElementById('novoSalario').value = salarioAtual ? salarioAtual : '';
     });
-    document.getElementById('btnCancelarSalario').addEventListener('click', () => {
+        document.getElementById('btnCancelarSalario').addEventListener('click', () => {
         document.getElementById('formSalario').style.display = 'none';
         document.getElementById('btnEditarSalario').style.display = 'inline-block';
     });
-    document.getElementById('formSalario').addEventListener('submit', (e) => {
+        document.getElementById('formSalario').addEventListener('submit', (e) => {
         e.preventDefault();
         const novoSalario = parseFloat(document.getElementById('novoSalario').value);
         if (!isNaN(novoSalario) && novoSalario > 0) {
