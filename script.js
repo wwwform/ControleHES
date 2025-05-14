@@ -243,20 +243,17 @@ class GerenciadorHoras {
             totalGeral += result.total;
 
             const tr = document.createElement('tr');
-            tr.innerHTML = `
+            // No método renderizarTabela():
+tr.innerHTML = `
     <td>${registro.data}</td>
     <td>${registro.inicio} - ${registro.fim}</td>
-    <td>
-        <span 
-            title="Salário base deste cálculo: R$ ${registro.salarioMensal.toFixed(2)}&#10;Valor/hora: R$ ${(registro.salarioMensal / 220).toFixed(2)}"
-            style="cursor: help;"
-        >
-            R$ ${result.total.toFixed(2)} <span style="color: #666; font-size: 0.9em">${result.tipo}</span>
-        </span>
+    <td data-salario="${registro.salarioMensal}" class="valor-hora-cell" title="Salário base: R$ ${registro.salarioMensal.toFixed(2)} | Valor/hora: R$ ${(registro.salarioMensal/220).toFixed(2)}">
+        R$ ${result.total.toFixed(2)} ${result.tipo}
     </td>
     <td>${registro.justificativa}</td>
     <td><button class="btn-excluir" onclick="gerenciador.excluirRegistro(${registro.id})">🗑️</button></td>
 `;
+
 
             tbody.appendChild(tr);
         });
@@ -270,83 +267,117 @@ class GerenciadorHoras {
     }
 
     calcularFadiga() {
-    // Considera apenas os últimos 7 dias
-    const hoje = new Date();
-    const ultimos7Dias = [];
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(hoje);
-        date.setDate(date.getDate() - i);
-        ultimos7Dias.push(date.toISOString().slice(0, 10));
-    }
+    // Usa registros filtrados (do período selecionado)
+    const registrosFiltrados = this.filtroAtivo ?
+        this.registros.filter(r => {
+            const dataRegistro = new Date(r.data + 'T00:00:00');
+            return dataRegistro >= this.filtroInicio && dataRegistro <= this.filtroFim;
+        }) : this.registros;
 
     let totalHoras = 0;
-    let diasComLancamento = new Set();
+    let diasConsecutivos = 0;
+    let maxConsecutivo = 0;
+    let datasOrdenadas = [];
 
-    this.registros.forEach(registro => {
-        if (ultimos7Dias.includes(registro.data)) {
-            const [h1, m1] = registro.inicio.split(':').map(Number);
-            const [h2, m2] = registro.fim.split(':').map(Number);
-            let minutos = (h2 * 60 + m2) - (h1 * 60 + m1);
-            if (minutos < 0) minutos += 1440;
-            totalHoras += minutos / 60;
-            diasComLancamento.add(registro.data);
+    // Calcula horas extras e dias consecutivos
+    registrosFiltrados.forEach(registro => {
+        const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
+        const [horaFim, minutoFim] = registro.fim.split(':').map(Number);
+        let minutos = (horaFim * 60 + minutoFim) - (horaInicio * 60 + minutoInicio);
+        if (minutos < 0) minutos += 1440;
+        totalHoras += minutos / 60;
+        datasOrdenadas.push(registro.data);
+    });
+
+    // Ordena datas e verifica dias consecutivos
+    datasOrdenadas = [...new Set(datasOrdenadas)].sort();
+    let currentStreak = 0;
+    datasOrdenadas.forEach((data, index) => {
+        if (index > 0) {
+            const diffDays = (new Date(data) - new Date(datasOrdenadas[index - 1])) / (1000 * 60 * 60 * 24);
+            currentStreak = diffDays === 1 ? currentStreak + 1 : 0;
+            if (currentStreak > maxConsecutivo) maxConsecutivo = currentStreak;
         }
     });
 
+    // Define nível de fadiga
     let nivel = '🟢 Normal';
-    let tooltip = 'Nível de fadiga dentro do esperado';
-    if (totalHoras > 20 || diasComLancamento.size >= 6) {
+    if (totalHoras > 20 || maxConsecutivo >= 5) {
         nivel = '🔴 Crítico';
-        tooltip = 'Alerta! Risco alto de fadiga acumulada';
-    } else if (totalHoras > 15 || diasComLancamento.size >= 4) {
+    } else if (totalHoras > 15 || maxConsecutivo >= 3) {
         nivel = '🟠 Atenção';
-        tooltip = 'Carga de trabalho elevada, considere reduzir horas';
     }
 
+    // Atualiza a exibição (sem tooltip)
     document.getElementById('nivelFadiga').innerHTML = nivel;
-    document.getElementById('nivelFadiga').title = tooltip + `\nHoras extras nos últimos 7 dias: ${totalHoras.toFixed(1)}h\nDias com lançamento: ${diasComLancamento.size}`;
 }
+
     this.calcularFadiga();
     this.renderizarGrafico();
 
 
     renderizarGrafico() {
-        const ctx = document.getElementById('graficoHoras').getContext('2d');
-        if (this.grafico) this.grafico.destroy();
+    const ctx = document.getElementById('graficoHoras').getContext('2d');
+    if (this.grafico) this.grafico.destroy();
 
-        const periodos = {};
-        this.registros.forEach(registro => {
-            const mes = registro.data.slice(0, 7);
-            if (!periodos[mes]) periodos[mes] = 0;
-            const result = this.calcularValor(registro);
-            periodos[mes] += result.total;
-        });
+    // Agrupar por mês e separar valores de 75% e 100%
+    const meses = {};
+    this.registros.forEach(registro => {
+        const mes = registro.data.slice(0, 7); // YYYY-MM
+        if (!meses[mes]) meses[mes] = { valor75: 0, valor100: 0 };
+        const result = this.calcularValor(registro);
+        meses[mes].valor75 += result.valor75;
+        meses[mes].valor100 += result.valor100;
+    });
 
-        this.grafico = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: Object.keys(periodos),
-                datasets: [{
-                    label: 'Valor Total (R$)',
-                    data: Object.values(periodos),
-                    borderColor: '#3498db',
-                    borderWidth: 2,
+    const labels = Object.keys(meses);
+    const dados75 = labels.map(mes => meses[mes].valor75);
+    const dados100 = labels.map(mes => meses[mes].valor100);
+    const dadosTotal = labels.map(mes => meses[mes].valor75 + meses[mes].valor100);
+
+    this.grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Horas 75%',
+                    data: dados75,
+                    backgroundColor: '#3498db',
+                    borderColor: '#2980b9',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Horas 100%',
+                    data: dados100,
+                    backgroundColor: '#e74c3c',
+                    borderColor: '#c0392b',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Total',
+                    data: dadosTotal,
+                    type: 'line',
                     borderDash: [5, 5],
-                    tension: 0.4
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (value) => 'R$ ' + value.toFixed(2)
-                        }
+                    fill: false,
+                    borderColor: '#2c3e50'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => 'R$ ' + value.toFixed(2)
                     }
                 }
             }
-        });
-    }
+        }
+    });
+}
+
 
     excluirRegistro(id) {
         this.registros = this.registros.filter(r => r.id !== id);
