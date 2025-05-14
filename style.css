@@ -417,3 +417,35 @@ tr:hover {
         flex-direction: column;
     }
 }
+/* Adições para os componentes de login/cadastro */
+#recuperarSenhaContainer {
+    display: none;
+}
+
+.login-footer {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.login-separator {
+    position: relative;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.login-separator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #ddd;
+}
+
+.login-separator span {
+    position: relative;
+    background: white;
+    padding: 0 10px;
+    color: #777;
+}
