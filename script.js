@@ -68,7 +68,6 @@ class GerenciadorHoras {
         }
     });
 }
-    }
 
     async carregarFeriadosAPI() {
         try {
