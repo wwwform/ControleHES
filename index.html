@@ -8,17 +8,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+    <!-- Login -->
     <div id="loginContainer" class="login-container">
         <h2><span style="font-size:1.2em;">🔒</span> Login</h2>
         <div class="login-form-row">
-            <input type="text" id="loginUsername" placeholder="Seu nome" required>
-            <button id="btnLogin" type="button">Entrar</button>
+            <input type="text" id="loginUsername" placeholder="Usuário" required>
         </div>
+        <div class="login-form-row">
+            <input type="password" id="loginSenha" placeholder="Senha" required>
+        </div>
+        <button id="btnLogin">Entrar</button>
+        <div id="btnGoogleLogin" class="google-btn"></div>
     </div>
 
+    <!-- Conteúdo Principal -->
     <div id="mainContent" class="container" style="display:none;">
+        <!-- Cabeçalho -->
         <div class="header">
             <h1>🕒 Controle de Horas Extras Pro</h1>
             <div>
@@ -27,21 +36,25 @@
             </div>
         </div>
 
+        <!-- Notificações -->
         <div id="notificacoes" class="notificacao"></div>
 
+        <!-- Configuração do Salário -->
         <div class="config-salario">
             <h3>⚙️ Configuração do Salário</h3>
             <input type="number" id="salarioAtual" step="0.01" placeholder="Salário atual (R$)" required>
-            <button id="btnAtualizarSalario" type="button">Atualizar Salário</button>
+            <button id="btnAtualizarSalario">Atualizar Salário</button>
         </div>
 
+        <!-- Feriados Personalizados -->
         <div class="feriados-personalizados">
             <h3>🌟 Feriados Personalizados</h3>
             <input type="date" id="novoFeriado">
-            <button type="button" id="btnAddFeriado">Adicionar</button>
+            <button id="btnAddFeriado">Adicionar</button>
             <ul id="listaFeriadosPersonalizados"></ul>
         </div>
 
+        <!-- Formulário de Registro -->
         <form id="registroForm">
             <input type="date" id="data" required>
             <div class="time-inputs">
@@ -52,13 +65,15 @@
             <button type="submit">💾 Salvar Registro</button>
         </form>
 
+        <!-- Backup -->
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
-            <button type="button" onclick="exportarBackup()">Exportar Backup</button>
+            <button onclick="exportarBackup()">Exportar Backup</button>
             <input type="file" id="btnImportBackup" accept=".json" style="display:none;">
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
 
+        <!-- Resumo e Indicadores -->
         <div class="resumo">
             <h2 id="periodoResumo"></h2>
             <div id="valores">
@@ -66,21 +81,28 @@
                 <p>100%: R$ <span id="valor100">0.00</span></p>
                 <p>Total: R$ <span id="totalGeral">0.00</span></p>
             </div>
+            <div class="indicador-fadiga">
+                <h3>⚠️ Indicador de Fadiga</h3>
+                <div id="nivelFadiga"></div>
+                <small>Passe o mouse para detalhes</small>
+            </div>
             <div class="botoes-exportacao">
-                <button type="button" onclick="exportarExcel()">📊 Excel</button>
-                <button type="button" onclick="exportarPDF()">📄 PDF</button>
-                <button type="button" onclick="exportarWord()">📑 Word</button>
+                <button onclick="exportarExcel()">📊 Excel</button>
+                <button onclick="exportarPDF()">📄 PDF</button>
+                <button onclick="exportarWord()">📑 Word</button>
             </div>
         </div>
 
+        <!-- Filtros -->
         <div class="filtros">
             <input type="month" id="filtroMes">
             <input type="date" id="filtroInicio">
             <input type="date" id="filtroFim">
-            <button type="button" onclick="aplicarFiltroPersonalizado()">Filtrar</button>
-            <button type="button" onclick="limparFiltros()">Limpar Filtros</button>
+            <button onclick="aplicarFiltroPersonalizado()">🔎 Filtrar</button>
+            <button onclick="limparFiltros()">🔄 Limpar Filtros</button>
         </div>
 
+        <!-- Tabela -->
         <table id="registros">
             <thead>
                 <tr>
@@ -93,7 +115,14 @@
             </thead>
             <tbody></tbody>
         </table>
+
+        <!-- Gráfico -->
+        <div class="grafico-container">
+            <h3>📊 Gráfico de Horas Extras por Mês</h3>
+            <canvas id="graficoHoras"></canvas>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
