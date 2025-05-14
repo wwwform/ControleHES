@@ -29,32 +29,53 @@
             <div id="btnGoogleLogin" class="google-btn"></div>
             <div class="login-footer">
                 <p>Não tem uma conta? <button id="btnCadastrar" class="btn-link">Cadastre-se</button></p>
+                <p><button id="btnEsqueciSenha" class="btn-link">Esqueci minha senha</button></p>
             </div>
         </div>
         
         <!-- Registro de novo usuário -->
         <div id="registroContainer" style="display:none">
-    <h2><span style="font-size:1.2em;">📝</span> Cadastro</h2>
-    <form id="formRegistro">
-        <div class="login-form-row">
-            <input type="text" id="regNome" placeholder="Seu nome" required>
+            <h2><span style="font-size:1.2em;">📝</span> Cadastro</h2>
+            <form id="formRegistro">
+                <div class="login-form-row">
+                    <input type="text" id="regNome" placeholder="Seu nome" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="email" id="regEmail" placeholder="Seu email" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="password" id="regSenha" placeholder="Crie uma senha" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="password" id="regConfirmSenha" placeholder="Confirme a senha" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Cadastrar</button>
+                <div class="login-footer">
+                    <button type="button" id="btnVoltarLogin" class="btn-link">Voltar para o login</button>
+                </div>
+            </form>
         </div>
-        <div class="login-form-row">
-            <input type="email" id="regEmail" placeholder="Seu email" required>
-        </div>
-        <div class="login-form-row">
-            <input type="password" id="regSenha" placeholder="Crie uma senha" required>
-        </div>
-        <div class="login-form-row">
-            <input type="password" id="regConfirmSenha" placeholder="Confirme a senha" required>
-        </div>
-        <button type="submit" class="btn-primary btn-block">Cadastrar</button>
-        <div class="login-footer">
-            <button type="button" id="btnVoltarLogin" class="btn-link">Voltar para o login</button>
-        </div>
-    </form>
-</div>
 
+        <!-- Recuperar Senha -->
+        <div id="recuperarSenhaContainer" style="display:none">
+            <h2><span style="font-size:1.2em;">🔑</span> Recuperar Senha</h2>
+            <form id="formRecuperarSenha">
+                <div class="login-form-row">
+                    <input type="email" id="recEmail" placeholder="Seu email cadastrado" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="password" id="recNovaSenha" placeholder="Nova senha" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="password" id="recConfirmSenha" placeholder="Confirme a nova senha" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Redefinir Senha</button>
+                <div class="login-footer">
+                    <button type="button" id="btnVoltarLogin2" class="btn-link">Voltar para o login</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Conteúdo Principal -->
     <div id="mainContent" class="container" style="display:none;">
