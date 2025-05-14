@@ -794,3 +794,13 @@ th {
         align-items: flex-start;
     }
 }
+#btnGoogleLogin {
+    margin-top: 15px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#btnGoogleLogin > div {
+    width: 100% !important; /* Força largura total */
+}
