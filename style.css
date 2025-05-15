@@ -132,9 +132,9 @@ input[type="time"],
 input[type="number"],
 textarea {
     width: 100%;
-    padding: 12px;
+    padding: 4px;
     border: var(--border);
-    border-radius: 8px;
+    border-radius: 4px;
     font-size: 1rem;
 }
 
