@@ -334,3 +334,107 @@ textarea {
     flex: 1;
     min-width: 200px;
 }
+/* ====== Compactar espaçamentos ====== */
+.container, .login-container, #recuperarSenhaContainer {
+    padding: 18px !important;
+}
+.header {
+    margin-bottom: 16px !important;
+    padding-bottom: 10px !important;
+}
+.feriados-personalizados,
+.resumo,
+#backupSection {
+    margin-bottom: 14px !important;
+    padding: 12px 14px !important;
+}
+#registroForm {
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+}
+.valor-card {
+    margin: 4px 0 !important;
+    padding: 10px !important;
+}
+#valores {
+    gap: 10px !important;
+}
+input, textarea, select, .login-form-row input {
+    padding: 8px 8px !important;
+    font-size: 0.98em !important;
+}
+.login-form-row {
+    margin-bottom: 8px !important;
+}
+.grafico-container {
+    margin-top: 12px !important;
+    padding: 12px !important;
+}
+.botoes-exportacao, .filtros {
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+}
+#registros th, #registros td {
+    padding: 8px 8px !important;
+    font-size: 0.97em !important;
+}
+
+/* ====== Botão de Sair estilizado ====== */
+#btnLogout, .btn-outline, .logout-btn {
+    background: #ff3e3e;
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 8px 22px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 62, 62, 0.07);
+    transition: background 0.2s, transform 0.2s;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+#btnLogout:hover, .btn-outline:hover, .logout-btn:hover {
+    background: #d32f2f;
+    transform: scale(1.05);
+}
+#btnLogout:active, .btn-outline:active, .logout-btn:active {
+    background: #b71c1c;
+    transform: scale(0.98);
+}
+
+/* ====== Ajuste de espaçamento entre linhas ====== */
+body, p, th, td, label, .valor-label, .valor-value {
+    line-height: 1.25 !important;
+}
+
+/* ====== Outras melhorias visuais ====== */
+input, textarea, select {
+    border-radius: 8px !important;
+    border: 1.3px solid #d0d7de !important;
+}
+input:focus, textarea:focus, select:focus {
+    outline: 1.5px solid var(--secondary) !important;
+}
+button, .btn-primary, .btn-secondary {
+    border-radius: 8px !important;
+    font-size: 1em !important;
+    padding: 9px 18px !important;
+    font-weight: 500 !important;
+}
+
+/* ====== Responsivo extra ====== */
+@media (max-width: 600px) {
+    .container, .login-container, #recuperarSenhaContainer {
+        padding: 8px !important;
+    }
+    .header {
+        flex-direction: column;
+        gap: 8px;
+    }
+    #registroForm {
+        grid-template-columns: 1fr !important;
+    }
+}
