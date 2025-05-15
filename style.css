@@ -438,3 +438,37 @@ button, .btn-primary, .btn-secondary {
         grid-template-columns: 1fr !important;
     }
 }
+/* ====== Inputs e textarea mais finos e elegantes ====== */
+input[type="date"],
+input[type="time"],
+input[type="number"],
+textarea,
+.login-form-row input {
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: #d0d7de !important;
+    border-radius: 6px !important;
+    padding: 6px 8px !important;
+    font-size: 1em !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s;
+}
+
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+.login-form-row input:focus {
+    border-color: var(--secondary, #3498db) !important;
+    outline: none !important;
+}
+
+#registroForm {
+    gap: 6px !important;
+}
+
+.valor-card {
+    margin: 2px 0 !important;
+    padding: 8px !important;
+}
