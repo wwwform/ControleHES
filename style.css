@@ -163,7 +163,7 @@ body {
 .lottie-eye {
     position: absolute;
     right: 8px;
-    top: 50%;
+    top: 100%;
     transform: translateY(-50%);
     width: 38px !important;
     height: 38px !important;
@@ -172,7 +172,7 @@ body {
     max-width: 42px;
     max-height: 42px;
     cursor: pointer;
-    z-index: 2;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
