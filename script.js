@@ -71,19 +71,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==== FUNÇÕES DE LOGIN ====
 async function realizarLoginEmail() {
-    const email = document.getElementById('loginUsername').value.trim();
+    let loginInput = document.getElementById('loginUsername').value.trim();
     const senha = document.getElementById('loginSenha').value;
-    
+
+    let emailParaLogin = loginInput;
+
+    // Se não for um email, busque pelo nome de usuário
+    if (!loginInput.includes('@')) {
+        // Busca no Firestore pelo campo 'nome'
+        const snap = await db.collection('users').where('nome', '==', loginInput).get();
+        if (!snap.empty) {
+            emailParaLogin = snap.docs[0].data().email;
+        } else {
+            alert('Usuário não encontrado!');
+            return;
+        }
+    }
+
     try {
-        // Verifique se está usando a versão correta (modular ou compat)
-        const userCredential = await auth.signInWithEmailAndPassword(email, senha);
-        console.log('Login bem-sucedido:', userCredential.user);
-        // Continuar com navegação após login
+        await auth.signInWithEmailAndPassword(emailParaLogin, senha);
+        mostrarMain();
+        await carregarUsuario();
     } catch (err) {
-        console.error('Erro completo:', err);
-        alert('Email ou senha inválidos!');
+        alert('Email/Usuário ou senha inválidos!');
     }
 }
+
 
 
 async function realizarLoginGoogle() {
