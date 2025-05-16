@@ -87,7 +87,8 @@ function setupLottieEye(eyeId, inputId) {
         renderer: 'svg',
         loop: false,
         autoplay: false,
-        path: 'https://lottie.host/5b2b0e7a-4d11-4b8f-9e27-0a4b0b5b1b1d/6XwTnrRfDk.json'
+        path: 'https://assets6.lottiefiles.com/packages/lf20_3vbOcw.json' // novo link
+
     });
     anim.goToAndStop(0, true);
     container.addEventListener('click', function() {
