@@ -73,14 +73,18 @@ document.addEventListener('DOMContentLoaded', function() {
 async function realizarLoginEmail() {
     const email = document.getElementById('loginUsername').value.trim();
     const senha = document.getElementById('loginSenha').value;
+    
     try {
-        await auth.signInWithEmailAndPassword(email, senha);
-        mostrarMain();
-        await carregarUsuario();
+        // Verifique se está usando a versão correta (modular ou compat)
+        const userCredential = await auth.signInWithEmailAndPassword(email, senha);
+        console.log('Login bem-sucedido:', userCredential.user);
+        // Continuar com navegação após login
     } catch (err) {
+        console.error('Erro completo:', err);
         alert('Email ou senha inválidos!');
     }
 }
+
 
 async function realizarLoginGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
