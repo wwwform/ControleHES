@@ -10,6 +10,9 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <!-- Login -->
@@ -26,7 +29,7 @@
             <div class="login-separator">
                 <span>ou</span>
             </div>
-            <div id="btnGoogleLogin" class="google-btn"></div>
+            <button id="btnGoogleLogin" class="btn-secondary btn-block">Entrar com Google</button>
             <div class="login-footer">
                 <p>Não tem uma conta? <button id="btnCadastrar" class="btn-link">Cadastre-se</button></p>
                 <p><button id="btnEsqueciSenha" class="btn-link">Esqueci minha senha</button></p>
