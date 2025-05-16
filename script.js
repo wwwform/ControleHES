@@ -94,7 +94,7 @@ function setupLottieEye(eyeId, inputId) {
   renderer: 'svg',
   loop: false,
   autoplay: false,
-  path: 'https://assets5.lottiefiles.com/packages/lf20_lt5uklrj.json'
+  path: 'eye-animation.json'
 });
 
 document.getElementById('eyeLogin').addEventListener('click', function(){
