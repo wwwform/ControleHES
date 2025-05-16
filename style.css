@@ -165,19 +165,26 @@ body {
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px;
+    min-height: 38px;
+    max-width: 42px;
+    max-height: 42px;
     cursor: pointer;
     z-index: 2;
-    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
+    padding: 0;
 }
 .lottie-eye svg {
-    width: 32px !important;
-    height: 32px !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
 }
+
 
 .lottie-eye:hover {
     opacity: 0.8;
