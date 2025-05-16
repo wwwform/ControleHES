@@ -492,7 +492,6 @@ class GerenciadorHoras {
         this.filtroAtivo = false;
         this.filtroInicio = null;
         this.filtroFim = null;
-        document.getElementById('filtroMes').value = '';
         document.getElementById('filtroInicio').value = '';
         document.getElementById('filtroFim').value = '';
         this.renderizarTabela();
