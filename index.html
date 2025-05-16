@@ -79,7 +79,6 @@
 
     <!-- Conteúdo Principal -->
     <div id="mainContent" class="container" style="display:none;">
-        <!-- Cabeçalho -->
         <div class="header">
             <h1>🕒 Controle de Horas Extras Pro</h1>
             <div>
@@ -88,10 +87,8 @@
             </div>
         </div>
 
-        <!-- Notificações -->
         <div id="notificacoes" class="notificacao"></div>
 
-        <!-- Botão para editar salário -->
         <div class="config-salario" id="configSalarioBox">
             <button id="btnEditarSalario" class="btn-secondary">Editar Salário</button>
             <form id="formSalario" style="display:none; margin-top:10px;">
@@ -101,7 +98,6 @@
             </form>
         </div>
 
-        <!-- Feriados Personalizados -->
         <div class="feriados-personalizados">
             <h3>🌟 Feriados Personalizados</h3>
             <input type="date" id="novoFeriado">
@@ -109,7 +105,6 @@
             <ul id="listaFeriadosPersonalizados"></ul>
         </div>
 
-        <!-- Formulário de Registro -->
         <form id="registroForm">
             <input type="date" id="data" required>
             <div class="time-inputs">
@@ -120,7 +115,6 @@
             <button type="submit" class="btn-primary">💾 Salvar Registro</button>
         </form>
 
-        <!-- Backup -->
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
             <button onclick="exportarBackup()" class="btn-secondary">Exportar Backup</button>
@@ -128,7 +122,6 @@
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
 
-        <!-- Resumo e Indicadores -->
         <div class="resumo">
             <h2 id="periodoResumo"></h2>
             <div id="valores">
@@ -156,15 +149,14 @@
             </div>
         </div>
 
-        <!-- Filtros -->
         <div class="filtros">
+            <input type="month" id="filtroMes">
             <input type="date" id="filtroInicio">
             <input type="date" id="filtroFim">
             <button onclick="aplicarFiltroPersonalizado()" class="btn-secondary">🔎 Filtrar</button>
-            <button onclick="limparFiltros()" class="btn-outline">🔄 Limpar Filtro</button>
+            <button onclick="limparFiltros()" class="btn-outline">🔄 Limpar</button>
         </div>
 
-        <!-- Tabela -->
         <table id="registros">
             <thead>
                 <tr>
@@ -178,7 +170,6 @@
             <tbody></tbody>
         </table>
 
-        <!-- Gráfico -->
         <div class="grafico-container">
             <h3>📊 Gráfico de Horas Extras por Mês</h3>
             <canvas id="graficoHoras"></canvas>
