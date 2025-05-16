@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Horas Extras Pro</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Lottie Animations -->
+    <script src="https://unpkg.com/lottie-web@5.10.2/build/player/lottie.min.js"></script>
+
+    <!-- Outras libs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <!-- Login -->
@@ -20,10 +26,11 @@
         <div id="loginForm">
             <h2><span style="font-size:1.2em;">🔒</span> Login</h2>
             <div class="login-form-row">
-                <input type="text" id="loginUsername" placeholder="Email ou usuário" required>
+                <input type="text" id="loginUsername" placeholder="Usuário ou email" required>
             </div>
-            <div class="login-form-row">
+            <div class="senha-container">
                 <input type="password" id="loginSenha" placeholder="Senha" required>
+                <div id="eyeLogin" class="lottie-eye"></div>
             </div>
             <button id="btnLogin" class="btn-primary btn-block">Entrar</button>
             <div class="login-separator">
@@ -46,11 +53,13 @@
                 <div class="login-form-row">
                     <input type="email" id="regEmail" placeholder="Seu email" required>
                 </div>
-                <div class="login-form-row">
+                <div class="senha-container">
                     <input type="password" id="regSenha" placeholder="Crie uma senha" required>
+                    <div id="eyeRegSenha" class="lottie-eye"></div>
                 </div>
-                <div class="login-form-row">
+                <div class="senha-container">
                     <input type="password" id="regConfirmSenha" placeholder="Confirme a senha" required>
+                    <div id="eyeRegConfirm" class="lottie-eye"></div>
                 </div>
                 <button type="submit" class="btn-primary btn-block">Cadastrar</button>
                 <div class="login-footer">
@@ -66,11 +75,13 @@
                 <div class="login-form-row">
                     <input type="email" id="recEmail" placeholder="Seu email cadastrado" required>
                 </div>
-                <div class="login-form-row">
+                <div class="senha-container">
                     <input type="password" id="recNovaSenha" placeholder="Nova senha" required>
+                    <div id="eyeRecSenha" class="lottie-eye"></div>
                 </div>
-                <div class="login-form-row">
+                <div class="senha-container">
                     <input type="password" id="recConfirmSenha" placeholder="Confirme a nova senha" required>
+                    <div id="eyeRecConfirm" class="lottie-eye"></div>
                 </div>
                 <button type="submit" class="btn-primary btn-block">Redefinir Senha</button>
                 <div class="login-footer">
@@ -89,9 +100,7 @@
                 <button id="btnLogout" class="btn-outline">Sair</button>
             </div>
         </div>
-
         <div id="notificacoes" class="notificacao"></div>
-
         <div class="config-salario" id="configSalarioBox">
             <button id="btnEditarSalario" class="btn-secondary">Editar Salário</button>
             <form id="formSalario" style="display:none; margin-top:10px;">
@@ -100,14 +109,12 @@
                 <button type="button" id="btnCancelarSalario" class="btn-outline">Cancelar</button>
             </form>
         </div>
-
         <div class="feriados-personalizados">
             <h3>🌟 Feriados Personalizados</h3>
             <input type="date" id="novoFeriado">
             <button id="btnAddFeriado" class="btn-primary">Adicionar</button>
             <ul id="listaFeriadosPersonalizados"></ul>
         </div>
-
         <form id="registroForm">
             <input type="date" id="data" required>
             <div class="time-inputs">
@@ -117,14 +124,12 @@
             <textarea id="justificativa" placeholder="Justificativa" required></textarea>
             <button type="submit" class="btn-primary">💾 Salvar Registro</button>
         </form>
-
         <div id="backupSection">
             <h3>🔰 Backup & Restauração</h3>
             <button onclick="exportarBackup()" class="btn-secondary">Exportar Backup</button>
             <input type="file" id="btnImportBackup" accept=".json" style="display:none;">
             <label for="btnImportBackup" class="file-label">Importar Backup</label>
         </div>
-
         <div class="resumo">
             <h2 id="periodoResumo"></h2>
             <div id="valores">
@@ -151,7 +156,6 @@
                 <button onclick="exportarWord()" class="btn-secondary">📑 Word</button>
             </div>
         </div>
-
         <div class="filtros">
             <input type="month" id="filtroMes">
             <input type="date" id="filtroInicio">
@@ -159,7 +163,6 @@
             <button onclick="aplicarFiltroPersonalizado()" class="btn-secondary">🔎 Filtrar</button>
             <button onclick="limparFiltros()" class="btn-outline">🔄 Limpar</button>
         </div>
-
         <table id="registros">
             <thead>
                 <tr>
@@ -172,13 +175,11 @@
             </thead>
             <tbody></tbody>
         </table>
-
         <div class="grafico-container">
             <h3>📊 Gráfico de Horas Extras por Mês</h3>
             <canvas id="graficoHoras"></canvas>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
