@@ -89,20 +89,24 @@ function setupLottieEye(eyeId, inputId) {
     container.innerHTML = "";
 
     // Carrega a animação (olho preto, visível em fundo branco)
-    const anim = lottie.loadAnimation({
-        container: container,
-        renderer: 'svg',
-        loop: false,
-        autoplay: false,
-        path: 'https://lottie.host/5b2b0e7a-4d11-4b8f-9e27-0a4b0b5b1b1d/6XwTnrRfDk.json'
-    });
-    anim.goToAndStop(0, true);
+    const eyeAnim = lottie.loadAnimation({
+  container: document.getElementById('eyeLogin'),
+  renderer: 'svg',
+  loop: false,
+  autoplay: false,
+  path: 'https://assets5.lottiefiles.com/packages/lf20_lt5uklrj.json'
+});
 
-    container.addEventListener('click', function() {
-        const isVisible = input.type === 'text';
-        input.type = isVisible ? 'password' : 'text';
-        anim.playSegments(isVisible ? [30, 0] : [0, 30], true);
-    });
+document.getElementById('eyeLogin').addEventListener('click', function(){
+  const senha = document.getElementById('loginSenha');
+  if(senha.type === 'password') {
+    senha.type = 'text';
+    eyeAnim.playSegments([0, 15], true);
+  } else {
+    senha.type = 'password';
+    eyeAnim.playSegments([15, 30], true);
+  }
+});
 }
 
 // ==== LOGIN POR USUÁRIO OU EMAIL ====
