@@ -45,13 +45,56 @@ function mostrarMain() {
 }
 
 // ==== EVENTOS DE LOGIN/CADASTRO ====
-document.getElementById('btnCadastrar').onclick = mostrarRegistro;
-document.getElementById('btnVoltarLogin').onclick = mostrarLogin;
-document.getElementById('btnVoltarLogin2').onclick = mostrarLogin;
-document.getElementById('btnEsqueciSenha').onclick = mostrarRecuperarSenha;
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('btnCadastrar').onclick = mostrarRegistro;
+    document.getElementById('btnVoltarLogin').onclick = mostrarLogin;
+    document.getElementById('btnVoltarLogin2').onclick = mostrarLogin;
+    document.getElementById('btnEsqueciSenha').onclick = mostrarRecuperarSenha;
+    document.getElementById('btnLogin').onclick = realizarLoginEmail;
+    document.getElementById('btnGoogleLogin').onclick = realizarLoginGoogle;
+    document.getElementById('formRegistro').onsubmit = registrarUsuario;
+    document.getElementById('formRecuperarSenha').onsubmit = redefinirSenha;
+    document.getElementById('formSalario').onsubmit = salvarSalario;
+    document.getElementById('btnEditarSalario').onclick = function() {
+        document.getElementById('formSalario').style.display = 'block';
+        document.getElementById('btnEditarSalario').style.display = 'none';
+    };
+    document.getElementById('btnCancelarSalario').onclick = function() {
+        document.getElementById('formSalario').style.display = 'none';
+        document.getElementById('btnEditarSalario').style.display = 'inline-block';
+    };
+    document.getElementById('registroForm').onsubmit = salvarRegistro;
+    document.getElementById('btnAddFeriado').onclick = adicionarFeriadoPersonalizado;
+    document.getElementById('btnImportBackup').addEventListener('change', importarBackup);
+    document.getElementById('filtroMes').onchange = filtrarPorMes;
+});
 
-// Cadastro
-document.getElementById('formRegistro').onsubmit = async function(e) {
+// ==== FUNÇÕES DE LOGIN ====
+async function realizarLoginEmail() {
+    const email = document.getElementById('loginUsername').value.trim();
+    const senha = document.getElementById('loginSenha').value;
+    try {
+        await auth.signInWithEmailAndPassword(email, senha);
+        mostrarMain();
+        await carregarUsuario();
+    } catch (err) {
+        alert('Email ou senha inválidos!');
+    }
+}
+
+async function realizarLoginGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+        await auth.signInWithPopup(provider);
+        mostrarMain();
+        await carregarUsuario();
+    } catch (err) {
+        alert('Erro no login Google: ' + err.message);
+    }
+}
+
+// ==== CADASTRO ====
+async function registrarUsuario(e) {
     e.preventDefault();
     const nome = document.getElementById('regNome').value.trim();
     const email = document.getElementById('regEmail').value.trim();
@@ -66,35 +109,10 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
     } catch (err) {
         alert(err.message);
     }
-};
+}
 
-// Login email/senha
-document.getElementById('btnLogin').onclick = async function() {
-    const email = document.getElementById('loginUsername').value.trim();
-    const senha = document.getElementById('loginSenha').value;
-    try {
-        await auth.signInWithEmailAndPassword(email, senha);
-        mostrarMain();
-        await carregarUsuario();
-    } catch (err) {
-        alert('Email ou senha inválidos!');
-    }
-};
-
-// Login Google
-document.getElementById('btnGoogleLogin').onclick = async function() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-        await auth.signInWithPopup(provider);
-        mostrarMain();
-        await carregarUsuario();
-    } catch (err) {
-        alert('Erro no login Google: ' + err.message);
-    }
-};
-
-// Recuperar senha
-document.getElementById('formRecuperarSenha').onsubmit = async function(e) {
+// ==== RECUPERAÇÃO DE SENHA ====
+async function redefinirSenha(e) {
     e.preventDefault();
     const email = document.getElementById('recEmail').value.trim();
     try {
@@ -104,9 +122,9 @@ document.getElementById('formRecuperarSenha').onsubmit = async function(e) {
     } catch (err) {
         alert('Erro ao enviar email: ' + err.message);
     }
-};
+}
 
-// Logout
+// ==== LOGOUT ====
 document.getElementById('btnLogout').onclick = () => auth.signOut();
 
 // ==== OBSERVADOR DE USUÁRIO LOGADO ====
@@ -141,8 +159,7 @@ async function carregarUsuario() {
 }
 
 // ==== CRUD DE REGISTROS (Firestore) ====
-// Salvar novo registro
-document.getElementById('registroForm').onsubmit = async function(e) {
+async function salvarRegistro(e) {
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) return;
@@ -157,16 +174,14 @@ document.getElementById('registroForm').onsubmit = async function(e) {
     });
     await carregarRegistros();
     e.target.reset();
-};
+}
 
-// Carregar registros
 async function carregarRegistros() {
     const user = auth.currentUser;
     if (!user) return;
     const tbody = document.querySelector('#registros tbody');
     tbody.innerHTML = '';
     let query = db.collection('users').doc(user.uid).collection('registros').orderBy('data', 'desc');
-    // Filtros
     if (filtroAtivo && filtroInicio && filtroFim) {
         query = query.where('data', '>=', filtroInicio).where('data', '<=', filtroFim);
     }
@@ -180,7 +195,6 @@ async function carregarRegistros() {
     renderizarTabela();
 }
 
-// Excluir registro
 window.excluirRegistro = async function(id) {
     const user = auth.currentUser;
     if (!user) return;
@@ -188,8 +202,8 @@ window.excluirRegistro = async function(id) {
     await carregarRegistros();
 };
 
-// Salvar salário
-document.getElementById('formSalario').onsubmit = async function(e) {
+// ==== SALÁRIO ====
+async function salvarSalario(e) {
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) return;
@@ -198,10 +212,12 @@ document.getElementById('formSalario').onsubmit = async function(e) {
     await db.collection('users').doc(user.uid).collection('config').doc('salario').set({ valor });
     salarioAtual = valor;
     alert('Salário atualizado!');
-};
+    document.getElementById('formSalario').style.display = 'none';
+    document.getElementById('btnEditarSalario').style.display = 'inline-block';
+}
 
-// Feriados personalizados
-document.getElementById('btnAddFeriado').onclick = async function() {
+// ==== FERIADOS PERSONALIZADOS ====
+async function adicionarFeriadoPersonalizado() {
     const user = auth.currentUser;
     if (!user) return;
     const input = document.getElementById('novoFeriado');
@@ -211,8 +227,8 @@ document.getElementById('btnAddFeriado').onclick = async function() {
     feriadosPersonalizados.push(data);
     renderizarFeriadosPersonalizados();
     input.value = '';
-};
-window.gerenciador = { // para onclick inline
+}
+window.gerenciador = {
     removerFeriadoPersonalizado: async function(data) {
         const user = auth.currentUser;
         if (!user) return;
@@ -221,7 +237,6 @@ window.gerenciador = { // para onclick inline
         renderizarFeriadosPersonalizados();
     }
 };
-
 function renderizarFeriadosPersonalizados() {
     const ul = document.getElementById('listaFeriadosPersonalizados');
     ul.innerHTML = '';
@@ -232,7 +247,7 @@ function renderizarFeriadosPersonalizados() {
     });
 }
 
-// ==== TABELA, FILTROS E GRÁFICO ====
+// ==== TABELA, FILTROS, GRÁFICO ====
 function calcularValor(registro) {
     const valorHora = registro.salarioMensal / 220;
     const [horaInicio, minutoInicio] = registro.inicio.split(':').map(Number);
@@ -259,24 +274,19 @@ function calcularValor(registro) {
         tipo: (isFimSemana || isFeriadoPersonalizado) ? '100%' : (horas <= 2 ? '75%' : '75%/100%')
     };
 }
-
 function renderizarTabela() {
     const tbody = document.querySelector('#registros tbody');
     tbody.innerHTML = '';
     let total75 = 0, total100 = 0, totalGeral = 0;
-
     let registrosFiltrados = registros;
-    // Filtros personalizados
     if (filtroAtivo && filtroInicio && filtroFim) {
         registrosFiltrados = registros.filter(r => r.data >= filtroInicio && r.data <= filtroFim);
     }
-
     registrosFiltrados.forEach(registro => {
         const result = calcularValor(registro);
         total75 += result.valor75;
         total100 += result.valor100;
         totalGeral += result.total;
-
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${registro.data}</td>
@@ -289,21 +299,16 @@ function renderizarTabela() {
         `;
         tbody.appendChild(tr);
     });
-
     document.getElementById('valor75').textContent = total75.toFixed(2);
     document.getElementById('valor100').textContent = total100.toFixed(2);
     document.getElementById('totalGeral').textContent = totalGeral.toFixed(2);
-
     calcularFadiga(registrosFiltrados);
     renderizarGrafico(registrosFiltrados);
 }
-
 function calcularFadiga(registrosFiltrados) {
     let totalHoras = 0;
-    let diasConsecutivos = 0;
     let maxConsecutivo = 0;
     let datasOrdenadas = [];
-
     registrosFiltrados.forEach(registro => {
         const [h1, m1] = registro.inicio.split(':').map(Number);
         const [h2, m2] = registro.fim.split(':').map(Number);
@@ -312,7 +317,6 @@ function calcularFadiga(registrosFiltrados) {
         totalHoras += minutos / 60;
         datasOrdenadas.push(registro.data);
     });
-
     datasOrdenadas = [...new Set(datasOrdenadas)].sort();
     let currentStreak = 0;
     datasOrdenadas.forEach((data, index) => {
@@ -322,7 +326,6 @@ function calcularFadiga(registrosFiltrados) {
             if (currentStreak > maxConsecutivo) maxConsecutivo = currentStreak;
         }
     });
-
     let nivel = '🟢 Normal';
     if (totalHoras > 20 || maxConsecutivo >= 5) {
         nivel = '🔴 Crítico';
@@ -331,14 +334,11 @@ function calcularFadiga(registrosFiltrados) {
     }
     document.getElementById('nivelFadiga').innerHTML = nivel;
 }
-
 function renderizarGrafico(registrosFiltrados) {
     const ctx = document.getElementById('graficoHoras');
     if (!ctx) return;
     const context = ctx.getContext('2d');
     if (grafico) grafico.destroy();
-
-    // Agrupa por mês
     const periodos = {};
     registrosFiltrados.forEach(registro => {
         const mes = registro.data.slice(0, 7);
@@ -347,12 +347,10 @@ function renderizarGrafico(registrosFiltrados) {
         periodos[mes].valor75 += result.valor75;
         periodos[mes].valor100 += result.valor100;
     });
-
     const labels = Object.keys(periodos);
     const dados75 = labels.map(mes => periodos[mes].valor75);
     const dados100 = labels.map(mes => periodos[mes].valor100);
     const dadosTotal = labels.map(mes => periodos[mes].valor75 + periodos[mes].valor100);
-
     grafico = new Chart(context, {
         type: 'bar',
         data: {
@@ -407,9 +405,21 @@ window.limparFiltros = function() {
     document.getElementById('filtroFim').value = '';
     carregarRegistros();
 };
+window.filtrarPorMes = function() {
+    const mesAno = document.getElementById('filtroMes').value;
+    if (mesAno) {
+        filtroAtivo = true;
+        filtroInicio = mesAno + "-01";
+        filtroFim = mesAno + "-31";
+    } else {
+        filtroAtivo = false;
+        filtroInicio = null;
+        filtroFim = null;
+    }
+    carregarRegistros();
+};
 
 // ==== BACKUP E RESTAURAÇÃO FIRESTORE ====
-// Exportar backup (JSON)
 window.exportarBackup = async function() {
     const user = auth.currentUser;
     if (!user) return alert('Faça login primeiro!');
@@ -424,9 +434,7 @@ window.exportarBackup = async function() {
     const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
     saveAs(blob, `backupHE_${user.email}_${new Date().toISOString().slice(0,10)}.json`);
 };
-
-// Importar backup (JSON)
-document.getElementById('btnImportBackup').addEventListener('change', async function(e) {
+async function importarBackup(e) {
     const user = auth.currentUser;
     if (!user) return alert('Faça login primeiro!');
     const file = e.target.files[0];
@@ -435,23 +443,13 @@ document.getElementById('btnImportBackup').addEventListener('change', async func
     reader.onload = async function(event) {
         try {
             const backup = JSON.parse(event.target.result);
-            // Limpa coleções antigas
             const registrosRef = db.collection('users').doc(user.uid).collection('registros');
             const feriadosRef = db.collection('users').doc(user.uid).collection('feriados');
             (await registrosRef.get()).forEach(doc => registrosRef.doc(doc.id).delete());
             (await feriadosRef.get()).forEach(doc => feriadosRef.doc(doc.id).delete());
-            // Restaura registros
-            for (const r of backup.registros) {
-                await registrosRef.add(r);
-            }
-            // Restaura feriados
-            for (const f of backup.feriados) {
-                await feriadosRef.doc(f).set({ ativo: true });
-            }
-            // Restaura salário
-            if (backup.salario) {
-                await db.collection('users').doc(user.uid).collection('config').doc('salario').set({ valor: backup.salario });
-            }
+            for (const r of backup.registros) await registrosRef.add(r);
+            for (const f of backup.feriados) await feriadosRef.doc(f).set({ ativo: true });
+            if (backup.salario) await db.collection('users').doc(user.uid).collection('config').doc('salario').set({ valor: backup.salario });
             alert('Backup importado com sucesso!');
             await carregarUsuario();
         } catch (err) {
@@ -459,10 +457,9 @@ document.getElementById('btnImportBackup').addEventListener('change', async func
         }
     };
     reader.readAsText(file);
-});
+}
 
 // ==== EXPORTAÇÃO EXCEL/PDF/WORD ====
-// Excel
 window.exportarExcel = async function() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Horas Extras');
@@ -488,8 +485,6 @@ window.exportarExcel = async function() {
         saveAs(blob, `horas_extras_${new Date().toISOString().slice(0,10)}.xlsx`);
     });
 };
-
-// PDF
 window.exportarPDF = async function() {
     const doc = new jspdf.jsPDF();
     doc.setFontSize(16);
@@ -503,8 +498,6 @@ window.exportarPDF = async function() {
     });
     doc.save('relatorio.pdf');
 };
-
-// Word
 window.exportarWord = async function() {
     let content = `<h1>Relatório de Horas Extras</h1><table border="1"><tr><th>Data</th><th>Horas</th><th>Valor</th><th>Tipo</th><th>Justificativa</th></tr>`;
     registros.forEach(registro => {
