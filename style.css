@@ -415,7 +415,7 @@ textarea {
 .senha-container input[type="password"],
 .senha-container input[type="text"] {
     width: 100%;
-    padding: 8px 36px 8px 8px;
+    padding: 8px 8px;
     border: 1px solid #d0d7de;
     border-radius: 6px;
     font-size: 1em;
