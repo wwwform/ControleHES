@@ -152,6 +152,28 @@ body {
     outline: none;
 }
 
+.senha-container {
+    margin-bottom: 8px;
+    position: relative;
+}
+.senha-container input {
+    width: 100%;
+    padding-right: 36px;
+}
+.lottie-eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.lottie-eye:hover {
+    opacity: 0.8;
+}
+
 .login-footer {
     margin-top: 10px;
     text-align: center;
