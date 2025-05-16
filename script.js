@@ -79,18 +79,25 @@ document.addEventListener('DOMContentLoaded', function() {
 // ==== LOTTIE EYE ====
 function setupLottieEye(eyeId, inputId) {
     const container = document.getElementById(eyeId);
-    if (!container) return;
     const input = document.getElementById(inputId);
-    if (!input) return;
+    if (!container || !input || typeof lottie === "undefined") {
+        console.warn('Lottie ou container/input não encontrado:', eyeId, inputId);
+        return;
+    }
+
+    // Limpa qualquer conteúdo anterior
+    container.innerHTML = "";
+
+    // Carrega a animação (olho preto, visível em fundo branco)
     const anim = lottie.loadAnimation({
         container: container,
         renderer: 'svg',
         loop: false,
         autoplay: false,
-        path: 'https://assets6.lottiefiles.com/packages/lf20_3vbOcw.json' // novo link
-
+        path: 'https://lottie.host/5b2b0e7a-4d11-4b8f-9e27-0a4b0b5b1b1d/6XwTnrRfDk.json'
     });
     anim.goToAndStop(0, true);
+
     container.addEventListener('click', function() {
         const isVisible = input.type === 'text';
         input.type = isVisible ? 'password' : 'text';
