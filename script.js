@@ -1,12 +1,12 @@
 // ==== CONFIGURAÇÃO FIREBASE ====
 // Substitua pelos seus dados do Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBXL10m_SvDquaKKhwQJrwn-2J-2YMf_gE",
-  authDomain: "controlehesw.firebaseapp.com",
-  projectId: "controlehesw",
-  storageBucket: "controlehesw.firebasestorage.app",
-  messagingSenderId: "808084496678",
-  appId: "1:808084496678:web:ee9515b6191e892094e1e7"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+  appId: "SEU_APP_ID"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -44,7 +44,7 @@ function mostrarMain() {
     document.getElementById('mainContent').style.display = 'block';
 }
 
-// ==== EVENTOS DE LOGIN/CADASTRO ====
+// ==== EVENTOS DE LOGIN/CADASTRO E LOTTIE ====
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnCadastrar').onclick = mostrarRegistro;
     document.getElementById('btnVoltarLogin').onclick = mostrarLogin;
@@ -67,18 +67,42 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnAddFeriado').onclick = adicionarFeriadoPersonalizado;
     document.getElementById('btnImportBackup').addEventListener('change', importarBackup);
     document.getElementById('filtroMes').onchange = filtrarPorMes;
+
+    // Lottie animado para todos os campos de senha
+    setupLottieEye('eyeLogin', 'loginSenha');
+    setupLottieEye('eyeRegSenha', 'regSenha');
+    setupLottieEye('eyeRegConfirm', 'regConfirmSenha');
+    setupLottieEye('eyeRecSenha', 'recNovaSenha');
+    setupLottieEye('eyeRecConfirm', 'recConfirmSenha');
 });
 
-// ==== FUNÇÕES DE LOGIN ====
+// ==== LOTTIE EYE ====
+function setupLottieEye(eyeId, inputId) {
+    const container = document.getElementById(eyeId);
+    if (!container) return;
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const anim = lottie.loadAnimation({
+        container: container,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        path: 'https://lottie.host/5b2b0e7a-4d11-4b8f-9e27-0a4b0b5b1b1d/6XwTnrRfDk.json'
+    });
+    anim.goToAndStop(0, true);
+    container.addEventListener('click', function() {
+        const isVisible = input.type === 'text';
+        input.type = isVisible ? 'password' : 'text';
+        anim.playSegments(isVisible ? [30, 0] : [0, 30], true);
+    });
+}
+
+// ==== LOGIN POR USUÁRIO OU EMAIL ====
 async function realizarLoginEmail() {
     let loginInput = document.getElementById('loginUsername').value.trim();
     const senha = document.getElementById('loginSenha').value;
-
     let emailParaLogin = loginInput;
-
-    // Se não for um email, busque pelo nome de usuário
     if (!loginInput.includes('@')) {
-        // Busca no Firestore pelo campo 'nome'
         const snap = await db.collection('users').where('nome', '==', loginInput).get();
         if (!snap.empty) {
             emailParaLogin = snap.docs[0].data().email;
@@ -87,7 +111,6 @@ async function realizarLoginEmail() {
             return;
         }
     }
-
     try {
         await auth.signInWithEmailAndPassword(emailParaLogin, senha);
         mostrarMain();
@@ -96,8 +119,6 @@ async function realizarLoginEmail() {
         alert('Email/Usuário ou senha inválidos!');
     }
 }
-
-
 
 async function realizarLoginGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -159,22 +180,17 @@ async function carregarUsuario() {
     const user = auth.currentUser;
     if (!user) return;
     usuarioAtual = user;
-    // Saudação
     const doc = await db.collection('users').doc(user.uid).get();
     const nome = doc.exists ? doc.data().nome : user.email;
     document.getElementById('userGreeting').textContent = `Olá, ${nome}!`;
-    // Carregar salário
     const config = await db.collection('users').doc(user.uid).collection('config').doc('salario').get();
     salarioAtual = config.exists ? config.data().valor : '';
     document.getElementById('novoSalario').value = salarioAtual || '';
-    // Carregar feriados personalizados
     const feriadosSnap = await db.collection('users').doc(user.uid).collection('feriados').get();
     feriadosPersonalizados = feriadosSnap.docs.map(d => d.id);
     renderizarFeriadosPersonalizados();
-    // Carregar registros
     await carregarRegistros();
 }
-
 // ==== CRUD DE REGISTROS (Firestore) ====
 async function salvarRegistro(e) {
     e.preventDefault();
@@ -264,6 +280,16 @@ function renderizarFeriadosPersonalizados() {
     });
 }
 
+// ==== FORMATAÇÃO DE DATA BR ====
+function formatarDataBR(data_iso) {
+    if (!data_iso) return '';
+    const partes = data_iso.split('-');
+    if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    return data_iso;
+}
+
 // ==== TABELA, FILTROS, GRÁFICO ====
 function calcularValor(registro) {
     const valorHora = registro.salarioMensal / 220;
@@ -306,7 +332,7 @@ function renderizarTabela() {
         totalGeral += result.total;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${registro.data}</td>
+            <td>${formatarDataBR(registro.data)}</td>
             <td>${registro.inicio} - ${registro.fim}</td>
             <td title="Salário base: R$ ${registro.salarioMensal.toFixed(2)} | Valor/hora: R$ ${(registro.salarioMensal / 220).toFixed(2)}">
                 R$ ${result.total.toFixed(2)} <span style="color: #666; font-size: 0.9em">${result.tipo}</span>
@@ -364,10 +390,13 @@ function renderizarGrafico(registrosFiltrados) {
         periodos[mes].valor75 += result.valor75;
         periodos[mes].valor100 += result.valor100;
     });
-    const labels = Object.keys(periodos);
-    const dados75 = labels.map(mes => periodos[mes].valor75);
-    const dados100 = labels.map(mes => periodos[mes].valor100);
-    const dadosTotal = labels.map(mes => periodos[mes].valor75 + periodos[mes].valor100);
+    const labels = Object.keys(periodos).map(mes => {
+        const [ano, mesNum] = mes.split('-');
+        return `${mesNum}/${ano}`;
+    });
+    const dados75 = Object.keys(periodos).map(mes => periodos[mes].valor75);
+    const dados100 = Object.keys(periodos).map(mes => periodos[mes].valor100);
+    const dadosTotal = Object.keys(periodos).map(mes => periodos[mes].valor75 + periodos[mes].valor100);
     grafico = new Chart(context, {
         type: 'bar',
         data: {
@@ -405,7 +434,6 @@ function renderizarGrafico(registrosFiltrados) {
         }
     });
 }
-
 // ==== FILTROS ====
 window.aplicarFiltroPersonalizado = function() {
     filtroInicio = document.getElementById('filtroInicio').value;
@@ -490,7 +518,7 @@ window.exportarExcel = async function() {
     registros.forEach(registro => {
         const result = calcularValor(registro);
         worksheet.addRow({
-            data: registro.data,
+            data: formatarDataBR(registro.data),
             horas: `${registro.inicio} - ${registro.fim}`,
             valor: result.total.toFixed(2),
             tipo: result.tipo,
@@ -510,7 +538,7 @@ window.exportarPDF = async function() {
     let y = 30;
     registros.forEach(registro => {
         const result = calcularValor(registro);
-        doc.text(`${registro.data} - ${registro.inicio} às ${registro.fim}: R$ ${result.total.toFixed(2)} (${result.tipo})`, 20, y);
+        doc.text(`${formatarDataBR(registro.data)} - ${registro.inicio} às ${registro.fim}: R$ ${result.total.toFixed(2)} (${result.tipo})`, 20, y);
         y += 10;
     });
     doc.save('relatorio.pdf');
@@ -519,7 +547,7 @@ window.exportarWord = async function() {
     let content = `<h1>Relatório de Horas Extras</h1><table border="1"><tr><th>Data</th><th>Horas</th><th>Valor</th><th>Tipo</th><th>Justificativa</th></tr>`;
     registros.forEach(registro => {
         const result = calcularValor(registro);
-        content += `<tr><td>${registro.data}</td><td>${registro.inicio}-${registro.fim}</td><td>R$ ${result.total.toFixed(2)}</td><td>${result.tipo}</td><td>${registro.justificativa}</td></tr>`;
+        content += `<tr><td>${formatarDataBR(registro.data)}</td><td>${registro.inicio}-${registro.fim}</td><td>R$ ${result.total.toFixed(2)}</td><td>${result.tipo}</td><td>${registro.justificativa}</td></tr>`;
     });
     content += '</table>';
     const blob = new Blob([content], { type: 'application/msword' });
