@@ -1,12 +1,12 @@
 // ==== CONFIGURAÇÃO FIREBASE ====
 // Substitua pelos seus dados do Firebase
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_STORAGE_BUCKET",
-  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyBXL10m_SvDquaKKhwQJrwn-2J-2YMf_gE",
+  authDomain: "controlehesw.firebaseapp.com",
+  projectId: "controlehesw",
+  storageBucket: "controlehesw.firebasestorage.app",
+  messagingSenderId: "808084496678",
+  appId: "1:808084496678:web:ee9515b6191e892094e1e7"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
