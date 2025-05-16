@@ -1,12 +1,12 @@
 // ==== CONFIGURAÇÃO FIREBASE ====
-// Cole aqui o objeto firebaseConfig do seu painel Firebase
+// Substitua pelos seus dados do Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBXL10m_SvDquaKKhwQJrwn-2J-2YMf_gE",
-  authDomain: "controlehesw.firebaseapp.com",
-  projectId: "controlehesw",
-  storageBucket: "controlehesw.firebasestorage.app",
-  messagingSenderId: "808084496678",
-  appId: "1:808084496678:web:ee9515b6191e892094e1e7"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+  appId: "SEU_APP_ID"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -17,6 +17,9 @@ let registros = [];
 let feriadosPersonalizados = [];
 let salarioAtual = null;
 let grafico = null;
+let filtroAtivo = false;
+let filtroInicio = null;
+let filtroFim = null;
 
 // ==== TROCA DE TELAS ====
 function mostrarLogin() {
@@ -162,7 +165,12 @@ async function carregarRegistros() {
     if (!user) return;
     const tbody = document.querySelector('#registros tbody');
     tbody.innerHTML = '';
-    const snap = await db.collection('users').doc(user.uid).collection('registros').orderBy('data', 'desc').get();
+    let query = db.collection('users').doc(user.uid).collection('registros').orderBy('data', 'desc');
+    // Filtros
+    if (filtroAtivo && filtroInicio && filtroFim) {
+        query = query.where('data', '>=', filtroInicio).where('data', '<=', filtroFim);
+    }
+    const snap = await query.get();
     registros = [];
     snap.forEach(doc => {
         const r = doc.data();
@@ -234,7 +242,6 @@ function calcularValor(registro) {
     const horas = minutos / 60;
     const data = new Date(registro.data + 'T00:00:00');
     const isFimSemana = [0, 6].includes(data.getDay());
-    // Aqui você pode integrar feriados nacionais se quiser, via API
     const isFeriadoPersonalizado = feriadosPersonalizados.includes(registro.data);
     let valor75 = 0, valor100 = 0;
     if (isFimSemana || isFeriadoPersonalizado) {
@@ -258,10 +265,11 @@ function renderizarTabela() {
     tbody.innerHTML = '';
     let total75 = 0, total100 = 0, totalGeral = 0;
 
-    // Filtros (implemente conforme desejar)
     let registrosFiltrados = registros;
-    // Exemplo: filtro por período
-    // ...
+    // Filtros personalizados
+    if (filtroAtivo && filtroInicio && filtroFim) {
+        registrosFiltrados = registros.filter(r => r.data >= filtroInicio && r.data <= filtroFim);
+    }
 
     registrosFiltrados.forEach(registro => {
         const result = calcularValor(registro);
@@ -383,13 +391,127 @@ function renderizarGrafico(registrosFiltrados) {
     });
 }
 
-// ==== EXPORTAÇÃO E BACKUP (apenas local) ====
-// Você pode adaptar para Firestore se quiser salvar backups na nuvem
+// ==== FILTROS ====
+window.aplicarFiltroPersonalizado = function() {
+    filtroInicio = document.getElementById('filtroInicio').value;
+    filtroFim = document.getElementById('filtroFim').value;
+    filtroAtivo = !!(filtroInicio && filtroFim);
+    carregarRegistros();
+};
+window.limparFiltros = function() {
+    filtroAtivo = false;
+    filtroInicio = null;
+    filtroFim = null;
+    document.getElementById('filtroMes').value = '';
+    document.getElementById('filtroInicio').value = '';
+    document.getElementById('filtroFim').value = '';
+    carregarRegistros();
+};
 
-// ==== Filtros ====
-// Implemente filtros conforme sua necessidade, usando o array "registros" carregado da nuvem
+// ==== BACKUP E RESTAURAÇÃO FIRESTORE ====
+// Exportar backup (JSON)
+window.exportarBackup = async function() {
+    const user = auth.currentUser;
+    if (!user) return alert('Faça login primeiro!');
+    const registrosSnap = await db.collection('users').doc(user.uid).collection('registros').get();
+    const feriadosSnap = await db.collection('users').doc(user.uid).collection('feriados').get();
+    const configSnap = await db.collection('users').doc(user.uid).collection('config').get();
+    const backup = {
+        registros: registrosSnap.docs.map(d => d.data()),
+        feriados: feriadosSnap.docs.map(d => d.id),
+        salario: configSnap.docs.find(d => d.id === 'salario')?.data()?.valor || null
+    };
+    const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+    saveAs(blob, `backupHE_${user.email}_${new Date().toISOString().slice(0,10)}.json`);
+};
 
-// ==== Inicialização ====
-document.addEventListener('DOMContentLoaded', function() {
-    // Nada a mais aqui, tudo já está nos eventos
+// Importar backup (JSON)
+document.getElementById('btnImportBackup').addEventListener('change', async function(e) {
+    const user = auth.currentUser;
+    if (!user) return alert('Faça login primeiro!');
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+        try {
+            const backup = JSON.parse(event.target.result);
+            // Limpa coleções antigas
+            const registrosRef = db.collection('users').doc(user.uid).collection('registros');
+            const feriadosRef = db.collection('users').doc(user.uid).collection('feriados');
+            (await registrosRef.get()).forEach(doc => registrosRef.doc(doc.id).delete());
+            (await feriadosRef.get()).forEach(doc => feriadosRef.doc(doc.id).delete());
+            // Restaura registros
+            for (const r of backup.registros) {
+                await registrosRef.add(r);
+            }
+            // Restaura feriados
+            for (const f of backup.feriados) {
+                await feriadosRef.doc(f).set({ ativo: true });
+            }
+            // Restaura salário
+            if (backup.salario) {
+                await db.collection('users').doc(user.uid).collection('config').doc('salario').set({ valor: backup.salario });
+            }
+            alert('Backup importado com sucesso!');
+            await carregarUsuario();
+        } catch (err) {
+            alert('Backup inválido!');
+        }
+    };
+    reader.readAsText(file);
 });
+
+// ==== EXPORTAÇÃO EXCEL/PDF/WORD ====
+// Excel
+window.exportarExcel = async function() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Horas Extras');
+    worksheet.columns = [
+        { header: 'Data', key: 'data', width: 15 },
+        { header: 'Horário', key: 'horas', width: 20 },
+        { header: 'Valor (R$)', key: 'valor', width: 15 },
+        { header: 'Tipo', key: 'tipo', width: 10 },
+        { header: 'Justificativa', key: 'justificativa', width: 50 }
+    ];
+    registros.forEach(registro => {
+        const result = calcularValor(registro);
+        worksheet.addRow({
+            data: registro.data,
+            horas: `${registro.inicio} - ${registro.fim}`,
+            valor: result.total.toFixed(2),
+            tipo: result.tipo,
+            justificativa: registro.justificativa
+        });
+    });
+    workbook.xlsx.writeBuffer().then(buffer => {
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `horas_extras_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
+};
+
+// PDF
+window.exportarPDF = async function() {
+    const doc = new jspdf.jsPDF();
+    doc.setFontSize(16);
+    doc.text('Relatório de Horas Extras', 20, 20);
+    doc.setFontSize(12);
+    let y = 30;
+    registros.forEach(registro => {
+        const result = calcularValor(registro);
+        doc.text(`${registro.data} - ${registro.inicio} às ${registro.fim}: R$ ${result.total.toFixed(2)} (${result.tipo})`, 20, y);
+        y += 10;
+    });
+    doc.save('relatorio.pdf');
+};
+
+// Word
+window.exportarWord = async function() {
+    let content = `<h1>Relatório de Horas Extras</h1><table border="1"><tr><th>Data</th><th>Horas</th><th>Valor</th><th>Tipo</th><th>Justificativa</th></tr>`;
+    registros.forEach(registro => {
+        const result = calcularValor(registro);
+        content += `<tr><td>${registro.data}</td><td>${registro.inicio}-${registro.fim}</td><td>R$ ${result.total.toFixed(2)}</td><td>${result.tipo}</td><td>${registro.justificativa}</td></tr>`;
+    });
+    content += '</table>';
+    const blob = new Blob([content], { type: 'application/msword' });
+    saveAs(blob, 'relatorio.doc');
+};
