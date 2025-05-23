@@ -610,3 +610,4 @@ window.exportarWord = async function() {
     const blob = new Blob([content], { type: 'application/msword' });
     saveAs(blob, 'relatorio.doc');
 };
+}
