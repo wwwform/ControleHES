@@ -508,14 +508,12 @@ textarea {
 .senha-container {
     position: relative;
     margin-bottom: 8px;
-    display: flex;
-    align-items: center;
 }
 
 .senha-container input[type="password"],
 .senha-container input[type="text"] {
     width: 100%;
-    padding: 8px 42px 8px 8px; /* espaço extra à direita para o olho */
+    padding: 8px 42px 8px 12px; /* espaço à direita para o olho */
     border: 1px solid #d0d7de;
     border-radius: 6px;
     font-size: 1em;
@@ -535,8 +533,8 @@ textarea {
 
 .eye-icon {
     position: absolute;
-    right: 10px;
     top: 50%;
+    right: 12px;
     transform: translateY(-50%);
     width: 28px;
     height: 28px;
