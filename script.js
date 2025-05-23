@@ -136,30 +136,11 @@ document.addEventListener('DOMContentLoaded', function() {
             eyeClosedRecConf.style.display = isVisible ? '' : 'none';
         });
     }
-});
 
-
-
-// ==== LOTTIE EYE ====
-function setupLottieEye(eyeId, inputId) {
-    const container = document.getElementById(eyeId);
-    const input = document.getElementById(inputId);
-    if (!container || !input || typeof lottie === "undefined") {
-        console.warn('Lottie ou container/input não encontrado:', eyeId, inputId);
-        return;
-    }
 
     // Limpa qualquer conteúdo anterior
     container.innerHTML = "";
 
-    // Carrega a animação (olho preto, visível em fundo branco)
-    const eyeAnim = lottie.loadAnimation({
-  container: document.getElementById('eyeLogin'),
-  renderer: 'svg',
-  loop: false,
-  autoplay: false,
-  path: 'eye-animation.json'
-});
 
 document.getElementById('eyeLogin').addEventListener('click', function(){
   const senha = document.getElementById('loginSenha');
