@@ -44,8 +44,9 @@ function mostrarMain() {
     document.getElementById('mainContent').style.display = 'block';
 }
 
-// ==== EVENTOS DE LOGIN/CADASTRO E LOTTIE ====
+// ==== EVENTOS DE LOGIN/CADASTRO E MOSTRAR/OCULTAR SENHA ====
 document.addEventListener('DOMContentLoaded', function() {
+    // Eventos de navegação
     document.getElementById('btnCadastrar').onclick = mostrarRegistro;
     document.getElementById('btnVoltarLogin').onclick = mostrarLogin;
     document.getElementById('btnVoltarLogin2').onclick = mostrarLogin;
@@ -67,7 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnAddFeriado').onclick = adicionarFeriadoPersonalizado;
     document.getElementById('btnImportBackup').addEventListener('change', importarBackup);
     document.getElementById('filtroMes').onchange = filtrarPorMes;
-  // Login
+
+    // Mostrar/ocultar senha - Login
     const senhaInput = document.getElementById('loginSenha');
     const toggle = document.getElementById('toggleSenha');
     const eyeOpen = document.getElementById('eyeOpen');
@@ -81,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Cadastro (senha)
+    // Mostrar/ocultar senha - Cadastro (senha)
     const regSenhaInput = document.getElementById('regSenha');
     const toggleRegSenha = document.getElementById('toggleRegSenha');
     const eyeOpenReg = document.getElementById('eyeOpenReg');
@@ -95,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Cadastro (confirmação)
+    // Mostrar/ocultar senha - Cadastro (confirmação)
     const regConfirmInput = document.getElementById('regConfirmSenha');
     const toggleRegConfirm = document.getElementById('toggleRegConfirmSenha');
     const eyeOpenRegConf = document.getElementById('eyeOpenRegConf');
@@ -109,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Recuperação (nova senha)
+    // Mostrar/ocultar senha - Recuperação (nova senha)
     const recSenhaInput = document.getElementById('recNovaSenha');
     const toggleRecSenha = document.getElementById('toggleRecSenha');
     const eyeOpenRec = document.getElementById('eyeOpenRec');
@@ -123,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Recuperação (confirmação)
+    // Mostrar/ocultar senha - Recuperação (confirmação)
     const recConfirmInput = document.getElementById('recConfirmSenha');
     const toggleRecConfirm = document.getElementById('toggleRecConfirmSenha');
     const eyeOpenRecConf = document.getElementById('eyeOpenRecConf');
@@ -136,23 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             eyeClosedRecConf.style.display = isVisible ? '' : 'none';
         });
     }
-
-
-    // Limpa qualquer conteúdo anterior
-    container.innerHTML = "";
-
-
-document.getElementById('eyeLogin').addEventListener('click', function(){
-  const senha = document.getElementById('loginSenha');
-  if(senha.type === 'password') {
-    senha.type = 'text';
-    eyeAnim.playSegments([0, 15], true);
-  } else {
-    senha.type = 'password';
-    eyeAnim.playSegments([15, 30], true);
-  }
 });
-
 
 // ==== LOGIN POR USUÁRIO OU EMAIL ====
 async function realizarLoginEmail() {
@@ -248,6 +234,7 @@ async function carregarUsuario() {
     renderizarFeriadosPersonalizados();
     await carregarRegistros();
 }
+
 // ==== CRUD DE REGISTROS (Firestore) ====
 async function salvarRegistro(e) {
     e.preventDefault();
@@ -491,6 +478,7 @@ function renderizarGrafico(registrosFiltrados) {
         }
     });
 }
+
 // ==== FILTROS ====
 window.aplicarFiltroPersonalizado = function() {
     filtroInicio = document.getElementById('filtroInicio').value;
@@ -609,5 +597,4 @@ window.exportarWord = async function() {
     content += '</table>';
     const blob = new Blob([content], { type: 'application/msword' });
     saveAs(blob, 'relatorio.doc');
- };
-}
+};
