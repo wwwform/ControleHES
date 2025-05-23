@@ -609,5 +609,5 @@ window.exportarWord = async function() {
     content += '</table>';
     const blob = new Blob([content], { type: 'application/msword' });
     saveAs(blob, 'relatorio.doc');
-};
+ };
 }
