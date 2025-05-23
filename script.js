@@ -152,7 +152,7 @@ document.getElementById('eyeLogin').addEventListener('click', function(){
     eyeAnim.playSegments([15, 30], true);
   }
 });
-}
+
 
 // ==== LOGIN POR USUÁRIO OU EMAIL ====
 async function realizarLoginEmail() {
