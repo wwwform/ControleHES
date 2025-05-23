@@ -67,14 +67,78 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnAddFeriado').onclick = adicionarFeriadoPersonalizado;
     document.getElementById('btnImportBackup').addEventListener('change', importarBackup);
     document.getElementById('filtroMes').onchange = filtrarPorMes;
+  // Login
+    const senhaInput = document.getElementById('loginSenha');
+    const toggle = document.getElementById('toggleSenha');
+    const eyeOpen = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
+    if (toggle && senhaInput && eyeOpen && eyeClosed) {
+        toggle.addEventListener('click', function() {
+            const isVisible = senhaInput.type === 'text';
+            senhaInput.type = isVisible ? 'password' : 'text';
+            eyeOpen.style.display = isVisible ? 'none' : '';
+            eyeClosed.style.display = isVisible ? '' : 'none';
+        });
+    }
 
-    // Lottie animado para todos os campos de senha
-    setupLottieEye('eyeLogin', 'loginSenha');
-    setupLottieEye('eyeRegSenha', 'regSenha');
-    setupLottieEye('eyeRegConfirm', 'regConfirmSenha');
-    setupLottieEye('eyeRecSenha', 'recNovaSenha');
-    setupLottieEye('eyeRecConfirm', 'recConfirmSenha');
+    // Cadastro (senha)
+    const regSenhaInput = document.getElementById('regSenha');
+    const toggleRegSenha = document.getElementById('toggleRegSenha');
+    const eyeOpenReg = document.getElementById('eyeOpenReg');
+    const eyeClosedReg = document.getElementById('eyeClosedReg');
+    if (toggleRegSenha && regSenhaInput && eyeOpenReg && eyeClosedReg) {
+        toggleRegSenha.addEventListener('click', function() {
+            const isVisible = regSenhaInput.type === 'text';
+            regSenhaInput.type = isVisible ? 'password' : 'text';
+            eyeOpenReg.style.display = isVisible ? 'none' : '';
+            eyeClosedReg.style.display = isVisible ? '' : 'none';
+        });
+    }
+
+    // Cadastro (confirmação)
+    const regConfirmInput = document.getElementById('regConfirmSenha');
+    const toggleRegConfirm = document.getElementById('toggleRegConfirmSenha');
+    const eyeOpenRegConf = document.getElementById('eyeOpenRegConf');
+    const eyeClosedRegConf = document.getElementById('eyeClosedRegConf');
+    if (toggleRegConfirm && regConfirmInput && eyeOpenRegConf && eyeClosedRegConf) {
+        toggleRegConfirm.addEventListener('click', function() {
+            const isVisible = regConfirmInput.type === 'text';
+            regConfirmInput.type = isVisible ? 'password' : 'text';
+            eyeOpenRegConf.style.display = isVisible ? 'none' : '';
+            eyeClosedRegConf.style.display = isVisible ? '' : 'none';
+        });
+    }
+
+    // Recuperação (nova senha)
+    const recSenhaInput = document.getElementById('recNovaSenha');
+    const toggleRecSenha = document.getElementById('toggleRecSenha');
+    const eyeOpenRec = document.getElementById('eyeOpenRec');
+    const eyeClosedRec = document.getElementById('eyeClosedRec');
+    if (toggleRecSenha && recSenhaInput && eyeOpenRec && eyeClosedRec) {
+        toggleRecSenha.addEventListener('click', function() {
+            const isVisible = recSenhaInput.type === 'text';
+            recSenhaInput.type = isVisible ? 'password' : 'text';
+            eyeOpenRec.style.display = isVisible ? 'none' : '';
+            eyeClosedRec.style.display = isVisible ? '' : 'none';
+        });
+    }
+
+    // Recuperação (confirmação)
+    const recConfirmInput = document.getElementById('recConfirmSenha');
+    const toggleRecConfirm = document.getElementById('toggleRecConfirmSenha');
+    const eyeOpenRecConf = document.getElementById('eyeOpenRecConf');
+    const eyeClosedRecConf = document.getElementById('eyeClosedRecConf');
+    if (toggleRecConfirm && recConfirmInput && eyeOpenRecConf && eyeClosedRecConf) {
+        toggleRecConfirm.addEventListener('click', function() {
+            const isVisible = recConfirmInput.type === 'text';
+            recConfirmInput.type = isVisible ? 'password' : 'text';
+            eyeOpenRecConf.style.display = isVisible ? 'none' : '';
+            eyeClosedRecConf.style.display = isVisible ? '' : 'none';
+        });
+    }
 });
+
+
 
 // ==== LOTTIE EYE ====
 function setupLottieEye(eyeId, inputId) {
