@@ -513,14 +513,14 @@ textarea {
 .senha-container input[type="password"],
 .senha-container input[type="text"] {
     width: 100%;
-    padding: 8px 44px 8px 12px; /* espaço à direita para o olho */
+    padding: 10px 44px 10px 12px; /* espaço à direita para o olho */
     border: 1px solid #d0d7de;
     border-radius: 6px;
     font-size: 1em;
     background: #fff;
     box-shadow: none;
     transition: border-color 0.2s;
-    min-height: 40px;
+    min-height: 44px;
     margin-bottom: 0;
     box-sizing: border-box;
     display: block;
@@ -549,8 +549,8 @@ textarea {
 }
 
 .eye-icon svg {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     display: block;
     pointer-events: none;
 }
