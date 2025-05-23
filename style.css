@@ -132,62 +132,61 @@ body {
 }
 
 .login-form-row {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    width: 100%;
 }
 
-.login-form-row input {
+.login-form-row input,
+.senha-container input[type="password"],
+.senha-container input[type="text"] {
     width: 100%;
-    padding: 8px 8px;
+    padding: 12px 44px 12px 12px;
     border: 1px solid #d0d7de;
     border-radius: 6px;
     font-size: 1em;
     background: #fff;
     box-shadow: none;
     transition: border-color 0.2s;
-    min-height: 34px;
-}
-
-.login-form-row input:focus {
-    border-color: var(--secondary);
-    outline: none;
-}
-
-.senha-container {
-    margin-bottom: 8px;
-    position: relative;
-}
-.senha-container input {
-    width: 100%;
-    padding-right: 36px;
-}
-.lottie-eye {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100px !important;
-    height: 100px !important;
-    min-width: 38px;
-    min-height: 38px;
-    max-width: 42px;
-    max-height: 42px;
-    cursor: pointer;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    padding: 0;
-}
-.lottie-eye svg {
-    width: 100% !important;
-    height: 100% !important;
+    min-height: 44px;
+    margin-bottom: 0;
+    box-sizing: border-box;
     display: block;
 }
 
+.senha-container {
+    position: relative;
+    margin-bottom: 12px;
+    width: 100%;
+}
 
-.lottie-eye:hover {
-    opacity: 0.8;
+.senha-container input:focus,
+.login-form-row input:focus {
+    border-color: var(--secondary, #3498db);
+    outline: none;
+}
+
+.eye-icon {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.eye-icon svg {
+    width: 26px;
+    height: 26px;
+    display: block;
+    pointer-events: none;
 }
 
 .login-footer {
@@ -427,130 +426,4 @@ textarea {
     .valor-card {
         min-width: 100px;
     }
-}
-.senha-container input[type="password"],
-.senha-container input[type="text"] {
-    width: 100%;
-    padding: 8px 8px;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    font-size: 1em;
-    background: #fff;
-    box-shadow: none;
-    transition: border-color 0.2s;
-    min-height: 34px;
-    margin-bottom: 0;
-}
-
-.senha-container input:focus {
-    border-color: var(--secondary);
-    outline: none;
-}
-.lottie-eye {
-    /* ...outras regras... */
-    background: rgba(0,0,0,0.1); /* fundo cinza claro para debug */
-    pointer-events: all; /* garantir que é clicável */
-}
-
-/* Se o ícone estiver branco/invisível */
-.lottie-eye svg path {
-    fill: #2c3e50 !important; /* cor escura forçada */
-    stroke: #2c3e50 !important;
-}
-.senha-container {
-    position: relative;
-    margin-bottom: 8px;
-}
-.senha-container input[type="password"],
-.senha-container input[type="text"] {
-    width: 100%;
-    padding: 8px 40px 8px 8px;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    font-size: 1em;
-    background: #fff;
-    box-shadow: none;
-    transition: border-color 0.2s;
-    min-height: 34px;
-    margin-bottom: 0;
-}
-.senha-container input:focus {
-    border-color: var(--secondary, #3498db);
-    outline: none;
-}
-.eye-icon {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-}
-.eye-icon svg {
-    width: 28px;
-    height: 28px;
-    display: block;
-    pointer-events: none;
-}
-.btn-block {
-    width: 100%;
-    margin: 5px 0;
-}
-
-.senha-container {
-    position: relative;
-    margin-bottom: 8px;
-}
-
-.senha-container input[type="password"],
-.senha-container input[type="text"] {
-    width: 100%;
-    padding: 10px 44px 10px 12px; /* espaço à direita para o olho */
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    font-size: 1em;
-    background: #fff;
-    box-shadow: none;
-    transition: border-color 0.2s;
-    min-height: 44px;
-    margin-bottom: 0;
-    box-sizing: border-box;
-    display: block;
-}
-
-.senha-container input:focus {
-    border-color: var(--secondary, #3498db);
-    outline: none;
-}
-
-.eye-icon {
-    position: absolute;
-    top: 50%;
-    right: 12px;
-    transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-}
-
-.eye-icon svg {
-    width: 26px;
-    height: 26px;
-    display: block;
-    pointer-events: none;
 }
