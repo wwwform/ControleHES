@@ -11,9 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <!-- Lottie Animations -->
-    <script src="https://unpkg.com/lottie-web@5.10.2/build/player/lottie.min.js"></script>
-
     <!-- Outras libs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -22,67 +19,87 @@
 </head>
 <body>
     <!-- Login -->
-    <!-- LOGIN -->
-<div id="loginContainer" class="login-container">
-    <div id="loginForm">
-        <h2><span style="font-size:1.2em;">🔒</span> Login</h2>
-        <div class="login-form-row">
-            <input type="text" id="loginUsername" placeholder="Usuário ou email" required>
-        </div>
-        <div class="senha-container">
-            <input type="password" id="loginSenha" placeholder="Senha" required>
-            <button type="button" id="toggleSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
-                <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
-                <svg id="eyeOpen" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
-            </button>
+    <div id="loginContainer" class="login-container">
+        <div id="loginForm">
+            <h2><span style="font-size:1.2em;">🔒</span> Login</h2>
+            <div class="login-form-row">
+                <input type="text" id="loginUsername" placeholder="Usuário ou email" required>
+            </div>
+            <div class="senha-container">
+                <input type="password" id="loginSenha" placeholder="Senha" required>
+                <button type="button" id="toggleSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
+                    <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
+                    <svg id="eyeOpen" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
+                </button>
+            </div>
+            <button id="btnLogin" class="btn-primary btn-block">Entrar</button>
+            <div class="login-separator"><span>ou</span></div>
+            <button id="btnGoogleLogin" class="btn-secondary btn-block">Entrar com Google</button>
+            <div class="login-footer">
+                <p>Não tem uma conta? <button id="btnCadastrar" class="btn-link">Cadastre-se</button></p>
+                <p><button id="btnEsqueciSenha" class="btn-link">Esqueci minha senha</button></p>
+            </div>
         </div>
         
         <!-- Registro de novo usuário -->
         <div id="registroContainer" style="display:none">
-        <h2><span style="font-size:1.2em;">📝</span> Cadastro</h2>
-        <form id="formRegistro">
-            <div class="login-form-row">
-                <input type="text" id="regNome" placeholder="Seu nome" required>
-            </div>
-            <div class="login-form-row">
-                <input type="email" id="regEmail" placeholder="Seu email" required>
-            </div>
-            <div class="senha-container">
-                <input type="password" id="regSenha" placeholder="Crie uma senha" required>
-                <button type="button" id="toggleRegSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
-                    <svg id="eyeClosedReg" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
-                    <svg id="eyeOpenReg" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
-                </button>
-            </div>
-            <div class="senha-container">
-                <input type="password" id="regConfirmSenha" placeholder="Confirme a senha" required>
-                <button type="button" id="toggleRegConfirmSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
-                    <svg id="eyeClosedRegConf" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
-                    <svg id="eyeOpenRegConf" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
-                </button>
-            </div>
+            <h2><span style="font-size:1.2em;">📝</span> Cadastro</h2>
+            <form id="formRegistro">
+                <div class="login-form-row">
+                    <input type="text" id="regNome" placeholder="Seu nome" required>
+                </div>
+                <div class="login-form-row">
+                    <input type="email" id="regEmail" placeholder="Seu email" required>
+                </div>
+                <div class="senha-container">
+                    <input type="password" id="regSenha" placeholder="Crie uma senha" required>
+                    <button type="button" id="toggleRegSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
+                        <svg id="eyeClosedReg" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
+                        <svg id="eyeOpenReg" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
+                    </button>
+                </div>
+                <div class="senha-container">
+                    <input type="password" id="regConfirmSenha" placeholder="Confirme a senha" required>
+                    <button type="button" id="toggleRegConfirmSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
+                        <svg id="eyeClosedRegConf" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
+                        <svg id="eyeOpenRegConf" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
+                    </button>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Cadastrar</button>
+                <div class="login-footer">
+                    <button type="button" id="btnVoltarLogin" class="btn-link">Voltar para o login</button>
+                </div>
+            </form>
+        </div>
 
-        <!-- RECUPERAÇÃO DE SENHA -->
-    <div id="recuperarSenhaContainer" style="display:none">
-        <h2><span style="font-size:1.2em;">🔑</span> Recuperar Senha</h2>
-        <form id="formRecuperarSenha">
-            <div class="login-form-row">
-                <input type="email" id="recEmail" placeholder="Seu email cadastrado" required>
-            </div>
-            <div class="senha-container">
-                <input type="password" id="recNovaSenha" placeholder="Nova senha" required>
-                <button type="button" id="toggleRecSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
-                    <svg id="eyeClosedRec" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
-                    <svg id="eyeOpenRec" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
-                </button>
-            </div>
-            <div class="senha-container">
-                <input type="password" id="recConfirmSenha" placeholder="Confirme a nova senha" required>
-                <button type="button" id="toggleRecConfirmSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
-                    <svg id="eyeClosedRecConf" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
-                    <svg id="eyeOpenRecConf" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
-                </button>
-            </div>
+        <!-- Recuperação de Senha -->
+        <div id="recuperarSenhaContainer" style="display:none">
+            <h2><span style="font-size:1.2em;">🔑</span> Recuperar Senha</h2>
+            <form id="formRecuperarSenha">
+                <div class="login-form-row">
+                    <input type="email" id="recEmail" placeholder="Seu email cadastrado" required>
+                </div>
+                <div class="senha-container">
+                    <input type="password" id="recNovaSenha" placeholder="Nova senha" required>
+                    <button type="button" id="toggleRecSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
+                        <svg id="eyeClosedRec" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
+                        <svg id="eyeOpenRec" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
+                    </button>
+                </div>
+                <div class="senha-container">
+                    <input type="password" id="recConfirmSenha" placeholder="Confirme a nova senha" required>
+                    <button type="button" id="toggleRecConfirmSenha" class="eye-icon" aria-label="Mostrar/ocultar senha">
+                        <svg id="eyeClosedRecConf" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3.11-11-7.5a11.05 11.05 0 0 1 5.17-5.92"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>
+                        <svg id="eyeOpenRecConf" style="display:none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12C3.73 7.61 7.61 5 12 5s8.27 2.61 11 7c-2.73 4.39-6.61 7-11 7s-8.27-2.61-11-7z"/></svg>
+                    </button>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Redefinir Senha</button>
+                <div class="login-footer">
+                    <button type="button" id="btnVoltarLogin2" class="btn-link">Voltar para o login</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Conteúdo Principal -->
     <div id="mainContent" class="container" style="display:none;">
