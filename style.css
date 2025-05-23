@@ -457,3 +457,46 @@ textarea {
     fill: #2c3e50 !important; /* cor escura forçada */
     stroke: #2c3e50 !important;
 }
+.senha-container {
+    position: relative;
+    margin-bottom: 8px;
+}
+.senha-container input[type="password"],
+.senha-container input[type="text"] {
+    width: 100%;
+    padding: 8px 40px 8px 8px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    font-size: 1em;
+    background: #fff;
+    box-shadow: none;
+    transition: border-color 0.2s;
+    min-height: 34px;
+    margin-bottom: 0;
+}
+.senha-container input:focus {
+    border-color: var(--secondary, #3498db);
+    outline: none;
+}
+.eye-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.eye-icon svg {
+    width: 28px;
+    height: 28px;
+    display: block;
+    pointer-events: none;
+}
